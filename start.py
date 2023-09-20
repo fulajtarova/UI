@@ -34,10 +34,20 @@ def right(board):
                 break
 
 
+def print_board(board):
+    for i in board:
+        print(i)
+    print()
+
+
 def start():
     board = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
     up(board)
-    print(board)
+    print_board(board)
+    right(board)
+    print_board(board)
+    left(board)
+    print_board(board)
 
 
 start()
