@@ -106,11 +106,70 @@ def is_solvable(board_start, board_end):
     return inversions_start % 2 == inversions_end % 2
 
 
-# function for creating tree with A* algorithm
-def create_tree(board, board_end):
-    # TODO
+# Function to create the A* search tree
+def a_star_recursive(board_start, board_end):
+    start_node = Node(board_start)
+    start_node.heuristic = calculate_heuristic(start_node.board, board_end)
 
-    return board
+    open_list = [start_node]
+    closed_set = set()
+
+    while open_list:
+        current_node = min(open_list, key=lambda node: node.depth + node.heuristic)
+        open_list.remove(current_node)
+
+        if current_node.board == board_end:
+            return current_node
+
+        closed_set.add(tuple(current_node.board))
+
+        empty_tile_index = current_node.board.index(0)
+        possible_moves = []
+
+        if empty_tile_index % 3 > 0:
+            possible_moves.append(("left", -1))
+        if empty_tile_index % 3 < 2:
+            possible_moves.append(("right", 1))
+        if empty_tile_index >= 3:
+            possible_moves.append(("up", -3))
+        if empty_tile_index < 6:
+            possible_moves.append(("down", 3))
+
+        for move, move_offset in possible_moves:
+            new_board = current_node.board[:]
+            new_board[empty_tile_index], new_board[empty_tile_index + move_offset] = (
+                new_board[empty_tile_index + move_offset],
+                new_board[empty_tile_index],
+            )
+            new_node = Node(
+                new_board,
+                operation=move,
+                depth=current_node.depth + 1,
+                parent=current_node,
+            )
+            new_node.heuristic = calculate_heuristic(new_node.board, board_end)
+
+            if tuple(new_node.board) not in closed_set:
+                open_list.append(new_node)
+
+    return None
+
+
+class Node:
+    def __init__(self, board, operation=None, depth=0, parent=None):
+        self.board = board
+        self.operation = operation
+        self.depth = depth
+        self.parent = parent
+        self.heuristic = 0
+
+    def __lt__(self, other):
+        return (self.depth + self.heuristic) < (other.depth + other.heuristic)
+
+
+# Function to calculate the heuristic value (wrong tiles)
+def calculate_heuristic(board, board_end):
+    return wrong_tiles(board, board_end)
 
 
 # main function to test the code
@@ -126,24 +185,36 @@ def start():
     board = random_board()
     board_end = random_board()
 
+    while is_solvable(board, board_end) == False:
+        board = random_board()
+        board_end = random_board()
+
     print("Start:")
     print_board(board)
     print("End:")
     print_board(board_end)
 
-    print("Is solvable: ")
-    print(is_solvable(board, board_end), "\n")
+    solution_node = a_star_recursive(board, board_end)
 
-    print("Wrong tiles: ")
-    print(wrong_tiles(board, board_end), "\n")
+    if solution_node:
+        print("Solution path:")
+        path = []
+        current_node = solution_node
+        while current_node:
+            path.append(current_node)
+            current_node = current_node.parent
+        path.reverse()
+        for node in path:
+            print_board(node.board)
+            print("Operation:", node.operation)
+            print("Depth:", node.depth)
+            print("Heuristic:", node.heuristic)
+            print()
+    else:
+        print("No solution found.")
 
-    print("Is solved: ")
-    print(is_solved(board, board_end), "\n")
 
-    print("Tiles distance: ")
-    print(tiles_distance(board, board_end), "\n")
-
-    # f=g+h g=depth h=heuristic
+# f=g+h g=depth h=heuristic
 
 
 start()
