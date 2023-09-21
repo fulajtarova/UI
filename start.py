@@ -107,6 +107,34 @@ def is_solvable(board_start, board_end):
 
 
 # Function to create the A* search tree
+def a_star(node, board_end):
+    empty_tile_index = node.board.index(0)
+    # has a left child
+    if empty_tile_index % 3 > 0:
+        node.left = Node(left(node.board))
+        node.left.heuristic = calculate_heuristic(node.left.board, board_end)
+        node.left.depth = node.depth + 1
+    # has a right child
+    if empty_tile_index % 3 < 2:
+        node.right = Node(right(node.board))
+        node.right.heuristic = calculate_heuristic(node.right.board, board_end)
+        node.right.depth = node.depth + 1
+    # has a up child
+    if empty_tile_index >= 3:
+        node.up = Node(up(node.board))
+        node.up.heuristic = calculate_heuristic(node.up.board, board_end)
+        node.up.depth = node.depth + 1
+    # has a down child
+    if empty_tile_index < 6:
+        node.down = Node(down(node.board))
+        node.down.heuristic = calculate_heuristic(node.down.board, board_end)
+        node.down.depth = node.depth + 1
+
+    return node
+
+
+"""
+# Function to create the A* search tree
 def a_star_recursive(board_start, board_end):
     start_node = Node(board_start)
     start_node.heuristic = calculate_heuristic(start_node.board, board_end)
@@ -153,15 +181,28 @@ def a_star_recursive(board_start, board_end):
                 open_list.append(new_node)
 
     return None
+"""
 
 
 class Node:
-    def __init__(self, board, operation=None, depth=0, parent=None):
+    def __init__(
+        self,
+        board,
+        operation=None,
+        depth=0,
+        up=None,
+        down=None,
+        left=None,
+        right=None,
+    ):
         self.board = board
         self.operation = operation
         self.depth = depth
-        self.parent = parent
         self.heuristic = 0
+        self.up = up
+        self.down = down
+        self.left = left
+        self.right = right
 
     def __lt__(self, other):
         return (self.depth + self.heuristic) < (other.depth + other.heuristic)
@@ -170,6 +211,21 @@ class Node:
 # Function to calculate the heuristic value (wrong tiles)
 def calculate_heuristic(board, board_end):
     return wrong_tiles(board, board_end)
+
+
+def print_path(node):
+    path = []
+    while node:
+        path.append(node)
+        node = node.parent
+    path.reverse()
+    for i, node in enumerate(path):
+        print(f"Step {i + 1}:")
+        print_board(node.board)
+        print("Operation:", node.operation)
+        print("Depth:", node.depth)
+        print("Heuristic:", node.heuristic)
+        print()
 
 
 # main function to test the code
@@ -194,6 +250,41 @@ def start():
     print("End:")
     print_board(board_end)
 
+    """node = Node(board)
+
+    while is_solved(node.board, board_end) == False:
+        node = a_star(node, board_end)"""
+
+    root = Node(board)
+    root.heuristic = calculate_heuristic(root.board, board_end)
+    open_list = [root]
+    closed_set = set()
+
+    while open_list:
+        current_node = min(open_list, key=lambda node: node.depth + node.heuristic)
+        open_list.remove(current_node)
+
+        if current_node.board == board_end:
+            print("Solution found!")
+            print_path(current_node)
+            return
+
+        closed_set.add(tuple(current_node.board))
+
+        current_node = a_star(current_node, board_end)
+
+        if current_node.up:
+            open_list.append(current_node.up)
+        if current_node.down:
+            open_list.append(current_node.down)
+        if current_node.left:
+            open_list.append(current_node.left)
+        if current_node.right:
+            open_list.append(current_node.right)
+
+    print("No solution found.")
+
+    """
     solution_node = a_star_recursive(board, board_end)
 
     if solution_node:
@@ -211,7 +302,7 @@ def start():
             print("Heuristic:", node.heuristic)
             print()
     else:
-        print("No solution found.")
+        print("No solution found.")"""
 
 
 # f=g+h g=depth h=heuristic
