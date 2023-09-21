@@ -4,62 +4,64 @@ import random
 # function to move the blank tile up
 def up(board):
     for i in range(len(board)):
-        for j in range(len(board[i])):
-            if board[i][j] == 0:
-                board[i][j], board[i - 1][j] = board[i - 1][j], board[i][j]
+        if board[i] == 0:
+            board[i], board[i - 3] = board[i - 3], board[i]
             return board
 
 
 # function to move the blank tile down
 def down(board):
     for i in range(len(board)):
-        for j in range(len(board[i])):
-            if board[i][j] == 0:
-                board[i][j], board[i + 1][j] = board[i + 1][j], board[i][j]
+        if board[i] == 0:
+            board[i], board[i + 3] = board[i + 3], board[i]
             return board
 
 
 # function to move the blank tile left
 def left(board):
     for i in range(len(board)):
-        for j in range(len(board[i])):
-            if board[i][j] == 0:
-                board[i][j], board[i][j - 1] = board[i][j - 1], board[i][j]
+        if board[i] == 0:
+            board[i], board[i - 1] = board[i - 1], board[i]
             return board
 
 
 # function to move the blank tile to the right
 def right(board):
     for i in range(len(board)):
-        for j in range(len(board[i])):
-            if board[i][j] == 0:
-                board[i][j], board[i][j + 1] = board[i][j + 1], board[i][j]
+        if board[i] == 0:
+            board[i], board[i + 1] = board[i + 1], board[i]
             return board
 
 
 # function to print the board
 def print_board(board):
-    for i in board:
-        print(i)
+    for i in range(3):
+        row = board[i * 3 : (i + 1) * 3]
+        print(" ".join(map(str, row)))
     print()
 
 
 # function to generate a random board
-def random_board(board):
+def random_board():
     numbers = list(range(9))
     random.shuffle(numbers)
-    board = [[numbers.pop() for _ in range(3)] for _ in range(3)]
-    return board
+    board = [numbers]
+    return board[0]
 
 
 # function to calculate how many tiles are in the wrong position
 def wrong_tiles(board, board_end):
     count = 0
     for i in range(len(board)):
-        for j in range(len(board[i])):
-            if board[i][j] != board_end[i][j]:
-                count += 1
+        if board[i] != board_end[i] and board[i] != 0:
+            count += 1
     return count
+
+
+"""
+
+
+"""
 
 
 # Function to calculate sum of distances of tiles from their goal positions
@@ -90,11 +92,6 @@ def is_solved(board, board_end):
     return True
 
 
-# function to pu board in a 1d list
-def flatten_board(board):
-    return [num for row in board for num in row if num != 0]
-
-
 # function to count inversions
 def count_inversions(arr):
     inversions = 0
@@ -107,13 +104,17 @@ def count_inversions(arr):
 
 # function to check if the board is solvable
 def is_solvable(board_start, board_end):
-    flat_start = flatten_board(board_start)
-    flat_end = flatten_board(board_end)
-
-    inversions_start = count_inversions(flat_start)
-    inversions_end = count_inversions(flat_end)
+    inversions_start = count_inversions(board_start)
+    inversions_end = count_inversions(board_end)
 
     return inversions_start % 2 == inversions_end % 2
+
+
+# function for creating tree with A* algorithm
+def create_tree(board, board_end):
+    # TODO
+
+    return board
 
 
 # main function to test the code
@@ -122,26 +123,34 @@ def start():
     # board = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
     # board_end = [[2, 1, 3], [4, 5, 6], [7, 8, 0]]
 
-    main_board = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
+    main_board = [1, 2, 3, 4, 5, 6, 7, 8, 0]
 
-    board = random_board(main_board)
-    board_end = random_board(main_board)
+    # board = random_board(main_board)
+    # board_end = random_board(main_board)
+
+    board = [2, 8, 3, 1, 6, 4, 7, 0, 5]
+    board_end = [1, 2, 3, 8, 0, 4, 7, 6, 5]
 
     print("Start:")
     print_board(board)
     print("End:")
     print_board(board_end)
 
+    print("Wrong tiles: ")
+    print(wrong_tiles(board, board_end))
+
+    """
     print("Is solvable: ")
     print(is_solvable(board, board_end))
 
     print("Is solved: ")
     print(is_solved(board, board_end))
 
-    print("Wrong tiles: ")
-    print(wrong_tiles(board, board_end))
+    
     print("Tiles distance: ")
-    print(tiles_distance(board, board_end))
+    print(tiles_distance(board, board_end))"""
+
+    # f=g+h g=depth h=heuristic
 
 
 start()
