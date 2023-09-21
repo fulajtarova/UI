@@ -49,6 +49,15 @@ def random_board():
     return board[0]
 
 
+# functoin to check if the board is solved
+def is_solved(board, board_end):
+    for i in range(len(board)):
+        if board[i] != board_end[i]:
+            return False
+    return True
+
+
+# heurisric 1
 # function to calculate how many tiles are in the wrong position
 def wrong_tiles(board, board_end):
     count = 0
@@ -58,38 +67,25 @@ def wrong_tiles(board, board_end):
     return count
 
 
-"""
+# heuristic 2
+# Function to calculate the Manhattan distance for a single tile
+def manhattan_distance(tile, current_position, goal_position):
+    if tile == 0:
+        return 0
+    tile -= 1
+    current_row, current_col = current_position // 3, current_position % 3
+    goal_row, goal_col = goal_position // 3, goal_position % 3
+    return abs(current_row - goal_row) + abs(current_col - goal_col)
 
 
-"""
-
-
-# Function to calculate sum of distances of tiles from their goal positions
-def tiles_distance(board, board_end):
+# Function to calculate the sum of Manhattan distances for all tiles
+def tiles_distance(board, goal):
     distance = 0
     for i in range(len(board)):
-        for j in range(len(board[i])):
-            tile_value = board[i][j]
-            goal_i, goal_j = find_goal_position(tile_value, board_end)
-            distance += abs(i - goal_i) + abs(j - goal_j)
+        tile_value = board[i]
+        goal_position = goal.index(tile_value)
+        distance += manhattan_distance(tile_value, i, goal_position)
     return distance
-
-
-# Function to find the goal position of a tile
-def find_goal_position(tile_value, board_end):
-    for i, row in enumerate(board_end):
-        if tile_value in row:
-            j = row.index(tile_value)
-            return i, j
-
-
-# functoin to check if the board is solved
-def is_solved(board, board_end):
-    for i in range(len(board)):
-        for j in range(len(board[i])):
-            if board[i][j] != board_end[i][j]:
-                return False
-    return True
 
 
 # function to count inversions
@@ -120,35 +116,32 @@ def create_tree(board, board_end):
 # main function to test the code
 def start():
     # unsovable board
-    # board = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
-    # board_end = [[2, 1, 3], [4, 5, 6], [7, 8, 0]]
+    # board = [1, 2, 3, 4, 5, 6, 7, 8, 0]
+    # board_end = [2, 1, 3, 4, 5, 6, 7, 8, 0]
 
-    main_board = [1, 2, 3, 4, 5, 6, 7, 8, 0]
+    # same board
+    # board = [1, 2, 3, 4, 5, 6, 7, 8, 0]
+    # board_end = [1, 2, 3, 4, 5, 6, 7, 8, 0]
 
-    # board = random_board(main_board)
-    # board_end = random_board(main_board)
-
-    board = [2, 8, 3, 1, 6, 4, 7, 0, 5]
-    board_end = [1, 2, 3, 8, 0, 4, 7, 6, 5]
+    board = random_board()
+    board_end = random_board()
 
     print("Start:")
     print_board(board)
     print("End:")
     print_board(board_end)
 
-    print("Wrong tiles: ")
-    print(wrong_tiles(board, board_end))
-
-    """
     print("Is solvable: ")
-    print(is_solvable(board, board_end))
+    print(is_solvable(board, board_end), "\n")
+
+    print("Wrong tiles: ")
+    print(wrong_tiles(board, board_end), "\n")
 
     print("Is solved: ")
-    print(is_solved(board, board_end))
+    print(is_solved(board, board_end), "\n")
 
-    
     print("Tiles distance: ")
-    print(tiles_distance(board, board_end))"""
+    print(tiles_distance(board, board_end), "\n")
 
     # f=g+h g=depth h=heuristic
 
