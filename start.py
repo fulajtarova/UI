@@ -118,19 +118,6 @@ class Node:
     def __str__(self):
         return f"Board: {self.board},Operand: {self.operand}, Depth: {self.depth}, F: {self.f}"
 
-    def print_solution(self):
-        path = []
-        current_node = self
-
-        while current_node:
-            if current_node.operand:
-                path.append(current_node.operand)
-            current_node = current_node.parent
-
-        path.reverse()
-        print("Solution path:")
-        print(" -> ".join(path))
-
 
 # Function to calculate the heuristic value (wrong tiles)
 def calculate_heuristic(board, board_end):
@@ -172,22 +159,31 @@ def insert(node, board_end, max_depth=10):
     print(comparison)
 
     min_value = min([item[1] for item in comparison], default=float("inf"))
-    print(min_value)
 
     for i in range(len(comparison)):
-        if comparison[i] and comparison[i][1] == min_value:
-            move_operands = ["left", "right", "up", "down"]
-            child_operand = move_operands[i]
-
-            child = Node(
-                board=comparison[i][0],
-                operand=child_operand,
-                depth=node.depth + 1,
-                parent=node,
-            )
-
-            # Set the correct child attribute based on the operand
-            setattr(node, f"{child_operand}_child", insert(child, board_end, max_depth))
+        if comparison[i][1] == min_value:
+            if i == 0:
+                node.l_child = insert(
+                    Node(comparison[i][0], "left", node.depth + 1, parent=node),
+                    board_end,
+                    max_depth,
+                )
+            if i == 1:
+                node.r_child = insert(
+                    Node(comparison[i][0], "right", node.depth + 1, parent=node),
+                )
+            if i == 2:
+                node.u_child = insert(
+                    Node(i[0], "up", node.depth + 1, parent=node),
+                    board_end,
+                    max_depth,
+                )
+            if i == 3:
+                node.d_child = insert(
+                    Node(i[0], "down", node.depth + 1, parent=node),
+                    board_end,
+                    max_depth,
+                )
 
     return node
 
