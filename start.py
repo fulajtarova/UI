@@ -1,6 +1,8 @@
 import random
 import copy
 
+solution = None
+
 
 # Function to move the blank tile up
 def up(board):
@@ -99,24 +101,45 @@ class Node:
         board=[],
         operand=None,
         depth=0,
-        u_child=None,
-        d_child=None,
-        r_child=None,
-        l_child=None,
+        up_child=None,
+        down_child=None,
+        right_child=None,
+        left_child=None,
         parent=None,
+        f=None,
     ):
         self.board = board  # The game board
         self.operand = operand  # The move that led to this board (e.g., "up", "down", "right", "left")
         self.depth = depth  # The depth of this node in the tree
-        self.f = None
-        self.u_child = u_child  # Up child
-        self.d_child = d_child  # Down child
-        self.r_child = r_child  # Right child
-        self.l_child = l_child  # Left child
+        self.f = f
+        self.up_child = up_child  # Up child
+        self.down_child = down_child  # Down child
+        self.right_child = right_child  # Right child
+        self.left_child = left_child  # Left child
         self.parent = parent
 
     def __str__(self):
         return f"Board: {self.board},Operand: {self.operand}, Depth: {self.depth}, F: {self.f}"
+
+    def print_solution(self):
+        path = []
+
+        # Traverse up the tree from the current node, collecting operands
+        while self.parent is not None:
+            path.append(f"Operation: {self.operand}\n{(self.board)}")
+            self = self.parent
+
+        # Print the solution path in reverse order
+
+        print("\n\n".join(reversed(path)))
+
+    def format_board(board):
+        formatted_board = ""
+        for i in range(3):
+            row = board[i * 3 : (i + 1) * 3]
+            formatted_board += " ".join(map(str, row))
+            formatted_board += "\n" if i < 2 else ""
+        return formatted_board
 
 
 # Function to calculate the heuristic value (wrong tiles)
@@ -130,6 +153,8 @@ def insert(node, board_end, max_depth=10):
     comparison = []
 
     if is_solved(node.board, board_end) or node.depth >= max_depth:
+        global solution
+        solution = copy.deepcopy(node)
         return node
 
     # Attempt to add a left child
@@ -138,6 +163,8 @@ def insert(node, board_end, max_depth=10):
     ):
         temp1 = left(node.board)
         comparison.append([temp1, node.depth + calculate_heuristic(temp1, board_end)])
+    else:
+        comparison.append([None, float("inf")])
 
     # Attempt to add a right child
     if empty_tile_index % 3 < 2 and (
@@ -145,45 +172,65 @@ def insert(node, board_end, max_depth=10):
     ):
         temp2 = right(node.board)
         comparison.append([temp2, node.depth + calculate_heuristic(temp2, board_end)])
+    else:
+        comparison.append([None, float("inf")])
 
     # Attempt to add an up child
     if empty_tile_index >= 3 and (node.parent is None or node.parent.operand != "down"):
         temp3 = up(node.board)
         comparison.append([temp3, node.depth + calculate_heuristic(temp3, board_end)])
+    else:
+        comparison.append([None, float("inf")])
 
     # Attempt to add a down child
     if empty_tile_index < 6 and (node.parent is None or node.parent.operand != "up"):
         temp4 = down(node.board)
         comparison.append([temp4, node.depth + calculate_heuristic(temp4, board_end)])
+    else:
+        comparison.append([None, float("inf")])
 
-    print(comparison)
+    # print(comparison)
 
     min_value = min([item[1] for item in comparison], default=float("inf"))
 
     for i in range(len(comparison)):
-        if comparison[i][1] == min_value:
+        if comparison[i][1] == min_value and comparison[i][0] is not None:
             if i == 0:
-                node.l_child = insert(
-                    Node(comparison[i][0], "left", node.depth + 1, parent=node),
-                    board_end,
-                    max_depth,
+                child = Node(
+                    comparison[i][0],
+                    "left",
+                    node.depth + 1,
+                    parent=node,
+                    f=node.depth + 1 + calculate_heuristic(comparison[i][0], board_end),
                 )
+                node.left_child = insert(child, board_end, max_depth)
             if i == 1:
-                node.r_child = insert(
-                    Node(comparison[i][0], "right", node.depth + 1, parent=node),
+                child = Node(
+                    comparison[i][0],
+                    "right",
+                    node.depth + 1,
+                    parent=node,
+                    f=node.depth + 1 + calculate_heuristic(comparison[i][0], board_end),
                 )
+                node.right_child = insert(child, board_end, max_depth)
             if i == 2:
-                node.u_child = insert(
-                    Node(i[0], "up", node.depth + 1, parent=node),
-                    board_end,
-                    max_depth,
+                child = Node(
+                    comparison[i][0],
+                    "up",
+                    node.depth + 1,
+                    parent=node,
+                    f=node.depth + 1 + calculate_heuristic(comparison[i][0], board_end),
                 )
+                node.up_child = insert(child, board_end, max_depth)
             if i == 3:
-                node.d_child = insert(
-                    Node(i[0], "down", node.depth + 1, parent=node),
-                    board_end,
-                    max_depth,
+                child = Node(
+                    comparison[i][0],
+                    "down",
+                    node.depth + 1,
+                    parent=node,
+                    f=node.depth + 1 + calculate_heuristic(comparison[i][0], board_end),
                 )
+                node.down_child = insert(child, board_end, max_depth)
 
     return node
 
@@ -198,8 +245,11 @@ def start():
     # board = [1, 2, 3, 4, 5, 6, 7, 8, 0]
     # board_end = [1, 2, 3, 4, 5, 6, 7, 8, 0]
 
-    board = [1, 2, 3, 4, 5, 6, 7, 8, 0]
-    board_end = [1, 2, 3, 4, 5, 6, 0, 7, 8]
+    # board = [1, 2, 3, 4, 5, 6, 7, 8, 0]
+    # board_end = [1, 2, 3, 4, 5, 6, 0, 7, 8]
+
+    board = [2, 8, 3, 1, 6, 4, 7, 0, 5]
+    board_end = [1, 2, 3, 0, 8, 4, 7, 6, 5]
 
     # board = random_board()
     # board_end = random_board()
@@ -211,11 +261,12 @@ def start():
 
     root = Node(board)
     root.f = root.depth + calculate_heuristic(root.board, board_end)
-    print(root)
 
     root = insert(root, board_end, 10)
 
-    print(root)
+    solution.print_solution()
+
+    print()
 
 
 start()
