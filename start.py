@@ -2,6 +2,7 @@ import random
 import copy
 
 solution = None
+visited_positions = set()
 
 
 # Function to move the blank tile up
@@ -41,11 +42,16 @@ def right(board):
 
 
 # function to print the board
-def print_board(board):
+def format_board(board):
+    new_board = ""
     for i in range(3):
-        row = board[i * 3 : (i + 1) * 3]
-        print(" ".join(map(str, row)))
-    print()
+        if i != 2:
+            row = board[i * 3 : (i + 1) * 3]
+            new_board += " ".join(map(str, row)) + "\n"
+        else:
+            row = board[i * 3 : (i + 1) * 3]
+            new_board += " ".join(map(str, row))
+    return new_board
 
 
 # function to generate a random board
@@ -126,20 +132,12 @@ class Node:
 
         # Traverse up the tree from the current node, collecting operands
         while self.parent is not None:
-            path.append(f"Operation: {self.operand}\n{(self.board)}")
+            path.append(f"Operation: {self.operand}\n{format_board(self.board)}")
             self = self.parent
 
         # Print the solution path in reverse order
 
         print("\n\n".join(reversed(path)))
-
-    def format_board(board):
-        formatted_board = ""
-        for i in range(3):
-            row = board[i * 3 : (i + 1) * 3]
-            formatted_board += " ".join(map(str, row))
-            formatted_board += "\n" if i < 2 else ""
-        return formatted_board
 
 
 # Function to calculate the heuristic value (wrong tiles)
@@ -158,32 +156,28 @@ def insert(node, board_end, max_depth=10):
         return node
 
     # Attempt to add a left child
-    if empty_tile_index % 3 > 0 and (
-        node.parent is None or node.parent.operand != "right"
-    ):
+    if empty_tile_index % 3 > 0 and (node.parent is None or node.operand != "right"):
         temp1 = left(node.board)
         comparison.append([temp1, node.depth + calculate_heuristic(temp1, board_end)])
     else:
         comparison.append([None, float("inf")])
 
     # Attempt to add a right child
-    if empty_tile_index % 3 < 2 and (
-        node.parent is None or node.parent.operand != "left"
-    ):
+    if empty_tile_index % 3 < 2 and (node.parent is None or node.operand != "left"):
         temp2 = right(node.board)
         comparison.append([temp2, node.depth + calculate_heuristic(temp2, board_end)])
     else:
         comparison.append([None, float("inf")])
 
     # Attempt to add an up child
-    if empty_tile_index >= 3 and (node.parent is None or node.parent.operand != "down"):
+    if empty_tile_index >= 3 and (node.parent is None or node.operand != "down"):
         temp3 = up(node.board)
         comparison.append([temp3, node.depth + calculate_heuristic(temp3, board_end)])
     else:
         comparison.append([None, float("inf")])
 
     # Attempt to add a down child
-    if empty_tile_index < 6 and (node.parent is None or node.parent.operand != "up"):
+    if empty_tile_index < 6 and (node.parent is None or node.operand != "up"):
         temp4 = down(node.board)
         comparison.append([temp4, node.depth + calculate_heuristic(temp4, board_end)])
     else:
@@ -249,15 +243,14 @@ def start():
     # board_end = [1, 2, 3, 4, 5, 6, 0, 7, 8]
 
     board = [2, 8, 3, 1, 6, 4, 7, 0, 5]
-    board_end = [1, 2, 3, 0, 8, 4, 7, 6, 5]
+    board_end = [1, 2, 3, 8, 0, 4, 7, 6, 5]
 
     # board = random_board()
     # board_end = random_board()
 
-    print("Start:")
-    print_board(board)
-    print("End:")
-    print_board(board_end)
+    print(f"Start:\n{format_board(board)}")
+    print(f"\nEnd:\n{format_board(board_end)}")
+    print("\n----------------------------------\n")
 
     root = Node(board)
     root.f = root.depth + calculate_heuristic(root.board, board_end)
