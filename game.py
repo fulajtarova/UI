@@ -2,64 +2,88 @@ import random
 import copy
 
 solution = None
-visited_positions = set()
+
+"""
+------------------------------------------------------------------------------------------------------------------------
+"""
 
 
 # Function to move the blank tile up
-def up(board):
+def up(board, m, n):
     board_copy = copy.deepcopy(board)
     for i in range(len(board_copy)):
         if board_copy[i] == 0:
-            board_copy[i], board_copy[i - 3] = board_copy[i - 3], board_copy[i]
-            return board_copy
+            if i - n >= 0:  # Check if moving up is within bounds
+                board_copy[i], board_copy[i - n] = board_copy[i - n], board_copy[i]
+                return board_copy
+    return board_copy
 
 
 # Function to move the blank tile down
-def down(board):
+def down(board, m, n):
     board_copy = copy.deepcopy(board)
     for i in range(len(board_copy)):
         if board_copy[i] == 0:
-            board_copy[i], board_copy[i + 3] = board_copy[i + 3], board_copy[i]
-            return board_copy
+            if i + n < len(board_copy):  # Check if moving down is within bounds
+                board_copy[i], board_copy[i + n] = board_copy[i + n], board_copy[i]
+                return board_copy
+    return board_copy
 
 
 # Function to move the blank tile left
-def left(board):
+def left(board, m, n):
     board_copy = copy.deepcopy(board)
     for i in range(len(board_copy)):
         if board_copy[i] == 0:
-            board_copy[i], board_copy[i - 1] = board_copy[i - 1], board_copy[i]
-            return board_copy
+            if i % n != 0:  # Check if moving left is within bounds
+                board_copy[i], board_copy[i - 1] = board_copy[i - 1], board_copy[i]
+                return board_copy
+    return board_copy
 
 
 # Function to move the blank tile to the right
-def right(board):
+def right(board, m, n):
     board_copy = copy.deepcopy(board)
     for i in range(len(board_copy)):
         if board_copy[i] == 0:
-            board_copy[i], board_copy[i + 1] = board_copy[i + 1], board_copy[i]
-            return board_copy
+            if (i + 1) % n != 0:  # Check if moving right is within bounds
+                board_copy[i], board_copy[i + 1] = board_copy[i + 1], board_copy[i]
+                return board_copy
+    return board_copy
+
+
+"""
+------------------------------------------------------------------------------------------------------------------------
+"""
 
 
 # function to print the board
-def format_board(board):
+def print_board(board, m, n):
     new_board = ""
-    for i in range(3):
-        if i != 2:
-            row = board[i * 3 : (i + 1) * 3]
-            new_board += " ".join(map(str, row)) + "\n"
-        else:
-            row = board[i * 3 : (i + 1) * 3]
-            new_board += " ".join(map(str, row))
+    for i in range(m):
+        for j in range(n):
+            new_board += f"{board[i*n+j]:2d} "
+        new_board += "\n"
+
     return new_board
 
 
+"""
+------------------------------------------------------------------------------------------------------------------------
+"""
+
+
 # function to generate a random board
-def random_board():
-    numbers = list(range(9))
+def random_board(m, n):
+    numbers = list(range(m * n))
     random.shuffle(numbers)
     board = [numbers]
     return board[0]
+
+
+"""
+------------------------------------------------------------------------------------------------------------------------
+"""
 
 
 # functoin to check if the board is solved
@@ -68,6 +92,11 @@ def is_solved(board, board_end):
         if board[i] != board_end[i]:
             return False
     return True
+
+
+"""
+------------------------------------------------------------------------------------------------------------------------
+"""
 
 
 # heurisric 1
@@ -101,6 +130,11 @@ def tiles_distance(board, goal):
     return distance
 
 
+"""
+------------------------------------------------------------------------------------------------------------------------
+"""
+
+
 class Node:
     def __init__(
         self,
@@ -127,17 +161,10 @@ class Node:
     def __str__(self):
         return f"Board: {self.board},Operand: {self.operand}, Depth: {self.depth}, F: {self.f}"
 
-    def print_solution(self):
-        path = []
 
-        # Traverse up the tree from the current node, collecting operands
-        while self.parent is not None:
-            path.append(f"Operation: {self.operand}\n{format_board(self.board)}")
-            self = self.parent
-
-        # Print the solution path in reverse order
-
-        print("\n\n".join(reversed(path)))
+"""
+------------------------------------------------------------------------------------------------------------------------
+"""
 
 
 # Function to calculate the heuristic value (wrong tiles)
@@ -145,7 +172,12 @@ def calculate_heuristic(board, board_end):
     return wrong_tiles(board, board_end)
 
 
-def insert(node, board_end, max_depth=10):
+"""
+------------------------------------------------------------------------------------------------------------------------
+"""
+
+
+def insert(node, board_end, max_depth=100):
     empty_tile_index = node.board.index(0)
 
     comparison = []
@@ -153,7 +185,7 @@ def insert(node, board_end, max_depth=10):
     if is_solved(node.board, board_end) or node.depth >= max_depth:
         global solution
         solution = copy.deepcopy(node)
-        return node
+        return None
 
     # Attempt to add a left child
     if empty_tile_index % 3 > 0 and (node.parent is None or node.operand != "right"):
@@ -182,8 +214,6 @@ def insert(node, board_end, max_depth=10):
         comparison.append([temp4, node.depth + calculate_heuristic(temp4, board_end)])
     else:
         comparison.append([None, float("inf")])
-
-    # print(comparison)
 
     min_value = min([item[1] for item in comparison], default=float("inf"))
 
@@ -227,39 +257,3 @@ def insert(node, board_end, max_depth=10):
                 node.down_child = insert(child, board_end, max_depth)
 
     return node
-
-
-# main function to test the code
-def start():
-    # unsovable board
-    # board = [1, 2, 3, 4, 5, 6, 7, 8, 0]
-    # board_end = [2, 1, 3, 4, 5, 6, 7, 8, 0]
-
-    # same board
-    # board = [1, 2, 3, 4, 5, 6, 7, 8, 0]
-    # board_end = [1, 2, 3, 4, 5, 6, 7, 8, 0]
-
-    # board = [1, 2, 3, 4, 5, 6, 7, 8, 0]
-    # board_end = [1, 2, 3, 4, 5, 6, 0, 7, 8]
-
-    board = [2, 8, 3, 1, 6, 4, 7, 0, 5]
-    board_end = [1, 2, 3, 8, 0, 4, 7, 6, 5]
-
-    # board = random_board()
-    # board_end = random_board()
-
-    print(f"Start:\n{format_board(board)}")
-    print(f"\nEnd:\n{format_board(board_end)}")
-    print("\n----------------------------------\n")
-
-    root = Node(board)
-    root.f = root.depth + calculate_heuristic(root.board, board_end)
-
-    root = insert(root, board_end, 10)
-
-    solution.print_solution()
-
-    print()
-
-
-start()
