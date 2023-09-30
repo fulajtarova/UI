@@ -1,3 +1,4 @@
+import heapq
 import random
 import copy
 
@@ -9,7 +10,7 @@ solution = None
 
 
 # Function to move the blank tile up
-def up(board, m, n):
+def up(board, n):
     board_copy = copy.deepcopy(board)
     for i in range(len(board_copy)):
         if board_copy[i] == 0:
@@ -20,7 +21,7 @@ def up(board, m, n):
 
 
 # Function to move the blank tile down
-def down(board, m, n):
+def down(board, n):
     board_copy = copy.deepcopy(board)
     for i in range(len(board_copy)):
         if board_copy[i] == 0:
@@ -31,7 +32,7 @@ def down(board, m, n):
 
 
 # Function to move the blank tile left
-def left(board, m, n):
+def left(board, n):
     board_copy = copy.deepcopy(board)
     for i in range(len(board_copy)):
         if board_copy[i] == 0:
@@ -42,7 +43,7 @@ def left(board, m, n):
 
 
 # Function to move the blank tile to the right
-def right(board, m, n):
+def right(board, n):
     board_copy = copy.deepcopy(board)
     for i in range(len(board_copy)):
         if board_copy[i] == 0:
@@ -87,11 +88,8 @@ def random_board(m, n):
 
 
 # functoin to check if the board is solved
-def is_solved(board, board_end):
-    for i in range(len(board)):
-        if board[i] != board_end[i]:
-            return False
-    return True
+def is_same(board, board_end):
+    return board == board_end
 
 
 """
@@ -101,7 +99,7 @@ def is_solved(board, board_end):
 
 # heurisric 1
 # function to calculate how many tiles are in the wrong position
-def wrong_tiles(board, board_end):
+def heuristic_1_wrong_tiles(board, board_end):
     count = 0
     for i in range(len(board)):
         if board[i] != board_end[i] and board[i] != 0:
@@ -121,7 +119,7 @@ def manhattan_distance(tile, current_position, goal_position):
 
 
 # Function to calculate the sum of Manhattan distances for all tiles
-def tiles_distance(board, goal):
+def heuristic_2_tiles_distance(board, goal):
     distance = 0
     for i in range(len(board)):
         tile_value = board[i]
@@ -161,99 +159,125 @@ class Node:
     def __str__(self):
         return f"Board: {self.board},Operand: {self.operand}, Depth: {self.depth}, F: {self.f}"
 
+    # Define a custom comparison method for nodes
+    def __lt__(self, other):
+        return self.f < other.f
+
 
 """
 ------------------------------------------------------------------------------------------------------------------------
 """
 
 
-# Function to calculate the heuristic value (wrong tiles)
 def calculate_heuristic(board, board_end):
-    return wrong_tiles(board, board_end)
+    return heuristic_1_wrong_tiles(board, board_end)
 
 
 """
 ------------------------------------------------------------------------------------------------------------------------
 """
 
+# Initialize a set for the closed list
+closed_set = set()
 
-def insert(node, board_end, max_depth=100):
-    empty_tile_index = node.board.index(0)
 
-    comparison = []
-
-    if is_solved(node.board, board_end) or node.depth >= max_depth:
+# Function to insert child nodes into the open list
+def insert(node, board_end, open_list, n, max_depth=50):
+    if is_same(node.board, board_end) or node.depth >= max_depth:
         global solution
         solution = copy.deepcopy(node)
+        print("Solution found!")
         return None
 
-    # Attempt to add a left child
-    if empty_tile_index % 3 > 0 and (node.parent is None or node.operand != "right"):
-        temp1 = left(node.board)
-        comparison.append([temp1, node.depth + calculate_heuristic(temp1, board_end)])
-    else:
-        comparison.append([None, float("inf")])
+    # Check if the node's board configuration is already in the closed set
+    if tuple(node.board) in closed_set:
+        return node  # Skip this node if it's in the closed set
 
-    # Attempt to add a right child
-    if empty_tile_index % 3 < 2 and (node.parent is None or node.operand != "left"):
-        temp2 = right(node.board)
-        comparison.append([temp2, node.depth + calculate_heuristic(temp2, board_end)])
-    else:
-        comparison.append([None, float("inf")])
+    # Add the current board configuration to the closed set
+    closed_set.add(tuple(node.board))
 
-    # Attempt to add an up child
-    if empty_tile_index >= 3 and (node.parent is None or node.operand != "down"):
-        temp3 = up(node.board)
-        comparison.append([temp3, node.depth + calculate_heuristic(temp3, board_end)])
-    else:
-        comparison.append([None, float("inf")])
+    l_ch = left(node.board, n)
+    r_ch = right(node.board, n)
+    u_ch = up(node.board, n)
+    d_ch = down(node.board, n)
 
-    # Attempt to add a down child
-    if empty_tile_index < 6 and (node.parent is None or node.operand != "up"):
-        temp4 = down(node.board)
-        comparison.append([temp4, node.depth + calculate_heuristic(temp4, board_end)])
-    else:
-        comparison.append([None, float("inf")])
+    if not is_same(l_ch, node.board):
+        child = Node(
+            l_ch,
+            "left",
+            node.depth + 1,
+            parent=node,
+            f=node.depth + 1 + calculate_heuristic(l_ch, board_end),
+        )
+        if child.board not in open_list:
+            heapq.heappush(open_list, (child.f, child))
 
-    min_value = min([item[1] for item in comparison], default=float("inf"))
+    if not is_same(r_ch, node.board):
+        child = Node(
+            r_ch,
+            "right",
+            node.depth + 1,
+            parent=node,
+            f=node.depth + 1 + calculate_heuristic(r_ch, board_end),
+        )
+        if child.board not in open_list:
+            heapq.heappush(open_list, (child.f, child))
 
-    for i in range(len(comparison)):
-        if comparison[i][1] == min_value and comparison[i][0] is not None:
-            if i == 0:
-                child = Node(
-                    comparison[i][0],
-                    "left",
-                    node.depth + 1,
-                    parent=node,
-                    f=node.depth + 1 + calculate_heuristic(comparison[i][0], board_end),
-                )
-                node.left_child = insert(child, board_end, max_depth)
-            if i == 1:
-                child = Node(
-                    comparison[i][0],
-                    "right",
-                    node.depth + 1,
-                    parent=node,
-                    f=node.depth + 1 + calculate_heuristic(comparison[i][0], board_end),
-                )
-                node.right_child = insert(child, board_end, max_depth)
-            if i == 2:
-                child = Node(
-                    comparison[i][0],
-                    "up",
-                    node.depth + 1,
-                    parent=node,
-                    f=node.depth + 1 + calculate_heuristic(comparison[i][0], board_end),
-                )
-                node.up_child = insert(child, board_end, max_depth)
-            if i == 3:
-                child = Node(
-                    comparison[i][0],
-                    "down",
-                    node.depth + 1,
-                    parent=node,
-                    f=node.depth + 1 + calculate_heuristic(comparison[i][0], board_end),
-                )
-                node.down_child = insert(child, board_end, max_depth)
+    if not is_same(u_ch, node.board):
+        child = Node(
+            u_ch,
+            "up",
+            node.depth + 1,
+            parent=node,
+            f=node.depth + 1 + calculate_heuristic(u_ch, board_end),
+        )
+        if child.board not in open_list:
+            heapq.heappush(open_list, (child.f, child))
+
+    if not is_same(d_ch, node.board):
+        child = Node(
+            d_ch,
+            "down",
+            node.depth + 1,
+            parent=node,
+            f=node.depth + 1 + calculate_heuristic(d_ch, board_end),
+        )
+        if child.board not in open_list:
+            heapq.heappush(open_list, (child.f, child))
 
     return node
+
+
+# Start of A* Algorithm
+def astar(board_start, board_end, n):
+    global solution
+    start_node = Node(board_start)
+    solution = None
+    open_list = []
+    heapq.heappush(open_list, (start_node.f, start_node))
+    while open_list:
+        _, current_node = heapq.heappop(open_list)
+        insert(current_node, board_end, open_list, n, 50)
+        if solution:
+            break
+
+    if solution:
+        print_solution_path(solution)
+
+
+# Rest of the code remains the same
+
+
+# Function to print the solution path
+def print_solution_path(solution_node):
+    path = []
+    current_node = solution_node
+    while current_node:
+        if current_node.operand:
+            path.append(current_node.operand)
+        current_node = current_node.parent
+
+    path.reverse()
+    print("Solution Path:")
+    for move in path:
+        print(move)
