@@ -5,6 +5,8 @@ import copy
 solution = None
 num_of_moves_h1 = 0
 num_of_moves_h2 = 0
+num_of_nodes_h1 = 0
+num_of_nodes_h2 = 0
 
 """
 ------------------------------------------------------------------------------------------------------------------------
@@ -109,7 +111,7 @@ Methods to calculate the heuristic values for the board configurations
 """
 
 
-# heurisric 1
+# heuristic 1
 # function to calculate how many tiles are in the wrong position
 def heuristic_1_wrong_tiles(board, board_end):
     count = 0
@@ -121,22 +123,22 @@ def heuristic_1_wrong_tiles(board, board_end):
 
 # heuristic 2
 # Function to calculate the Manhattan distance for a single tile
-def manhattan_distance(tile, current_position, goal_position):
+def manhattan_distance(tile, current_position, goal_position, n):
     if tile == 0:
         return 0
     tile -= 1
-    current_row, current_col = current_position // 3, current_position % 3
-    goal_row, goal_col = goal_position // 3, goal_position % 3
+    current_row, current_col = current_position // n, current_position % n
+    goal_row, goal_col = goal_position // n, goal_position % n
     return abs(current_row - goal_row) + abs(current_col - goal_col)
 
 
 # Function to calculate the sum of Manhattan distances for all tiles
-def heuristic_2_tiles_distance(board, goal):
+def heuristic_2_tiles_distance(board, goal, n):
     distance = 0
     for i in range(len(board)):
         tile_value = board[i]
         goal_position = goal.index(tile_value)
-        distance += manhattan_distance(tile_value, i, goal_position)
+        distance += manhattan_distance(tile_value, i, goal_position, n)
     return distance
 
 
@@ -159,8 +161,8 @@ class Node:
         self.board = board  # The game board
         self.operand = operand  # The move that led to this board (e.g., "up", "down", "right", "left")
         self.depth = depth  # The depth of this node in the tree
-        self.f = f
-        self.parent = parent
+        self.f = f  # The estimated cost of this node
+        self.parent = parent  # The parent node
 
     # Define a custom comparison method for nodes
     def __lt__(self, other):
@@ -174,11 +176,11 @@ Method to calculate the heuristic value based on the choice
 """
 
 
-def calculate_heuristic(choice, board, board_end):
+def calculate_heuristic(choice, board, board_end, n):
     if choice == 1:
         return heuristic_1_wrong_tiles(board, board_end)
     elif choice == 2:
-        return heuristic_2_tiles_distance(board, board_end)
+        return heuristic_2_tiles_distance(board, board_end, n)
 
 
 """
@@ -218,7 +220,7 @@ def insert(node, board_end, open_list, n, choice):
             "left",
             node.depth + 1,
             parent=node,
-            f=node.depth + 1 + calculate_heuristic(choice, l_ch, board_end),
+            f=node.depth + 1 + calculate_heuristic(choice, l_ch, board_end, n),
         )
         # Check if the child's board configuration is not in the open list
         if child.board not in open_list:
@@ -232,7 +234,7 @@ def insert(node, board_end, open_list, n, choice):
             "right",
             node.depth + 1,
             parent=node,
-            f=node.depth + 1 + calculate_heuristic(choice, r_ch, board_end),
+            f=node.depth + 1 + calculate_heuristic(choice, r_ch, board_end, n),
         )
         # Check if the child's board configuration is not in the open list
         if child.board not in open_list:
@@ -246,7 +248,7 @@ def insert(node, board_end, open_list, n, choice):
             "up",
             node.depth + 1,
             parent=node,
-            f=node.depth + 1 + calculate_heuristic(choice, u_ch, board_end),
+            f=node.depth + 1 + calculate_heuristic(choice, u_ch, board_end, n),
         )
         # Check if the child's board configuration is not in the open list
         if child.board not in open_list:
@@ -259,7 +261,7 @@ def insert(node, board_end, open_list, n, choice):
             "down",
             node.depth + 1,
             parent=node,
-            f=node.depth + 1 + calculate_heuristic(choice, d_ch, board_end),
+            f=node.depth + 1 + calculate_heuristic(choice, d_ch, board_end, n),
         )
         # Check if the child's board configuration is not in the open list
         if child.board not in open_list:
@@ -270,8 +272,8 @@ def insert(node, board_end, open_list, n, choice):
 
 # Start of A* Algorithm
 def astar(board_start, board_end, n, choice):
-    # Reset the closed set for each new A* search
-    global closed_set, solution, num_of_moves_h1, num_of_moves_h2
+    # Reset the closed set and solution for each new A* search
+    global closed_set, solution, num_of_moves_h1, num_of_moves_h2, num_of_nodes_h1, num_of_nodes_h2
     closed_set = set()
     solution = None
 
@@ -307,13 +309,14 @@ def astar(board_start, board_end, n, choice):
         # Insert child nodes into the open list and check for the solution
         insert(current_node, board_end, open_list, n, choice)
 
-        # If a solution is found, break out of the loop
+        # If a solution is found, print the solution path and break out of the loop
         if solution:
+            if choice == 1:
+                num_of_nodes_h1 = node_count
+            elif choice == 2:
+                num_of_nodes_h2 = node_count
+            print_solution_path(solution, choice)
             break
-
-    # If a solution is found, print the solution path
-    if solution:
-        print_solution_path(solution, choice)
 
 
 """
@@ -356,7 +359,7 @@ def print_solution_path(solution_node, choice):
 
 """
 ------------------------------------------------------------------------------------------------------------------------
-Method to get the number of moves for the heuristic choice for comparison
+Method to get the number of moves and nodes for the heuristic choice for comparison
 ------------------------------------------------------------------------------------------------------------------------
 """
 
@@ -366,3 +369,10 @@ def get_num_of_moves(choice):
         return num_of_moves_h1
     elif choice == 2:
         return num_of_moves_h2
+
+
+def get_num_of_nodes(choice):
+    if choice == 1:
+        return num_of_nodes_h1
+    elif choice == 2:
+        return num_of_nodes_h2

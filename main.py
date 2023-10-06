@@ -144,15 +144,29 @@ def main():
             print(
                 f"Number of steps for heuristic-manhattan distance: {game.get_num_of_moves(2)}",
             )
+            print(
+                f"\nTotal number of nodes generated with heuristic-wrong tiles: {game.get_num_of_nodes(1)}"
+            )
+            print(
+                f"Total number of nodes generated heuristic-manhattan distance: {game.get_num_of_nodes(2)}"
+            )
 
             if t1f < t2f:
-                print(
-                    f"\nHeuristic-wrong tiles is faster than heuristic-manhattan distance"
-                )
+                if t1f == 0:
+                    print(
+                        f"\nHeuristic-manhattan distance takes 0 ms to solve this problem"
+                    )
+                else:
+                    print(
+                        f"\nHeuristic-wrong tiles is {round(t2f/t1f,3)} times faster than heuristic-manhattan distance"
+                    )
             elif t1f > t2f:
-                print(
-                    f"\nHeuristic-manhattan distance is faster than heuristic-wrong tiles"
-                )
+                if t2f == 0:
+                    print(f"\nHeuristic-wrong tiles takes 0 ms to solve this problem")
+                else:
+                    print(
+                        f"\nHeuristic-manhattan distance is {round(t1f/t2f,3)} times faster than heuristic-wrong tiles"
+                    )
             else:
                 print(
                     f"\nHeuristic-wrong tiles and heuristic-manhattan distance take the same time"
@@ -160,16 +174,31 @@ def main():
 
             if game.get_num_of_moves(1) < game.get_num_of_moves(2):
                 print(
-                    f"Heuristic-wrong tiles takes {game.get_num_of_moves(2) - game.get_num_of_moves(1)} more steps than heuristic-manhattan distance"
+                    f"Heuristic-wrong tiles takes {round(game.get_num_of_moves(2)/game.get_num_of_moves(1),3)} times less steps than heuristic-manhattan distance"
                 )
             elif game.get_num_of_moves(1) > game.get_num_of_moves(2):
                 print(
-                    f"Heuristic-manhattan distance takes {game.get_num_of_moves(1) - game.get_num_of_moves(2)} more steps than heuristic-wrong tiles"
+                    f"Heuristic-manhattan distance takes {round(game.get_num_of_moves(1)/game.get_num_of_moves(2),3)} times less steps than heuristic-wrong tiles"
                 )
+
             else:
                 print(
                     f"Heuristic-wrong tiles and heuristic-manhattan distance take the same number of steps"
                 )
+
+            if game.get_num_of_nodes(1) < game.get_num_of_nodes(2):
+                print(
+                    f"Heuristic-wrong tiles generates {round(game.get_num_of_nodes(2)/game.get_num_of_nodes(1),3)} times less nodes than heuristic-manhattan distance"
+                )
+            elif game.get_num_of_nodes(1) > game.get_num_of_nodes(2):
+                print(
+                    f"Heuristic-manhattan distance generates {round(game.get_num_of_nodes(1)/game.get_num_of_nodes(2),3)} times less nodes than heuristic-wrong tiles"
+                )
+            else:
+                print(
+                    f"Heuristic-wrong tiles and heuristic-manhattan distance generate the same number of nodes"
+                )
+
         elif game.get_num_of_moves(1) == 0 and game.get_num_of_moves(2) != 0:
             print(magenta + "\n\nComparing the two heuristics:" + reset)
             print("\nHeuristic-wrong tiles was not able to find a solution")
@@ -179,6 +208,9 @@ def main():
             print(
                 f"Number of steps for heuristic-manhattan distance: {game.get_num_of_moves(2)}",
             )
+            print(
+                f"Total number of nodes generated heuristic-manhattan distance: {game.get_num_of_nodes(2)}"
+            )
         elif game.get_num_of_moves(2) == 0 and game.get_num_of_moves(1) != 0:
             print(magenta + "\n\nComparing the two heuristics:" + reset)
             print("\nHeuristic-manhattan distance was not able to find a solution")
@@ -186,18 +218,41 @@ def main():
             print(
                 f"Number of steps for heuristic-wrong tiles: {game.get_num_of_moves(1)}"
             )
+            print(
+                f"Total number of nodes generated with heuristic-wrong tiles: {game.get_num_of_nodes(1)}"
+            )
 
         else:
             print(Orange + "\nNo solution found in either case" + reset)
+            print(f"\nTime taken for heuristic-wrong tiles: {round(t1f*1000,3)} ms")
+            print(
+                f"Time taken for heuristic-manhattan distance: {round(t2f*1000,3)} ms"
+            )
 
 
 if __name__ == "__main__":
     main()
 
-# 123045678
-# 012345678
+# easy
+# start - 1 0 3 4 2 5 7 8 6
+# end - 1 2 3 4 5 6 7 8 0
+# start - 1 2 3 4 5 6 7 8 9 10 0 11 13 14 15 12
+# end - 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 0
 
-# 123804765
+# medium
+# start - 7 6 4 5 3 2 8 0 1
+# end - 4 0 5 8 2 1 3 7 6
+# start - 6 2 4 0 1 5 3 7 9 14 12 8 10 13 11 15
+# end - 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 0
 
-# 567408321 start
-# 123804765 end
+# hard
+# start - 5 6 7 4 0 8 3 2 1
+# end - 1 2 3 8 0 4 7 6 5
+# start - 6 5 4 3 2 1 8 7 9 10 15 11 13 14 12 0
+# end - 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 0
+
+# unsolvable
+# start - 3 7 0 6 4 8 1 2 5
+# end - 3 6 2 7 5 4 0 1 8
+# start - 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 0
+# end - 1 2 3 4 5 6 7 8 9 11 10 12 13 14 15 0
