@@ -126,7 +126,6 @@ def heuristic_1_wrong_tiles(board, board_end):
 def manhattan_distance(tile, current_position, goal_position, n):
     if tile == 0:
         return 0
-    tile -= 1
     current_row, current_col = current_position // n, current_position % n
     goal_row, goal_col = goal_position // n, goal_position % n
     return abs(current_row - goal_row) + abs(current_col - goal_col)
