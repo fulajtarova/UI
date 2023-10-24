@@ -1,5 +1,6 @@
 import random
 import printing
+import game
 
 
 def main():
@@ -8,6 +9,7 @@ def main():
         selection_type = input("Enter the selection/crossover type: ")
         mutation_probability = float(input("Enter the mutation probability: "))
         elitism = input("Enter the elitism y/n: ")
+        elitism_count = None
         if elitism == "y":
             elitism_count = int(
                 input("Enter the number of individuals to be selected for elitism: ")
@@ -32,6 +34,7 @@ def main():
             print("Exiting...")
             exit()
         elif user_option == 1:
+            treasure_count = 5
             board_size = 7
             board = [
                 0,
@@ -133,7 +136,25 @@ def main():
             for index in treasure_indexes:
                 board[int(index) - 1] = 2
 
+            treasure_count = 0
+
+            for item in board:
+                if item == 2:
+                    treasure_count += 1
+
             printing.print_letter_board(board)
+
+        game.play_game(
+            board,
+            board_size,
+            individual_count,
+            selection_type,
+            mutation_probability,
+            elitism,
+            elitism_count,
+            max_generations,
+            treasure_count,
+        )
 
 
 if __name__ == "__main__":
