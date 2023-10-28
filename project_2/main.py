@@ -4,11 +4,23 @@ import game
 
 
 def main():
+    num = bin(11)
+    num_plus_one = num + bin(1)
+    print(num_plus_one)
     while True:
-        individual_count = int(input("Enter the number of individuals: "))
+        """individual_count = int(input("Enter the number of individuals (approx. 20): "))
         random_values_for_individuals = int(
-            input("Enter number of random values for individual in virtual machine: ")
+            input(
+                "Enter number of random values for individual in virtual machine (approx. 16-64): "
+            )
         )
+        while random_values_for_individuals > 64:
+            print("Invalid number of random values. Please try again.")
+            random_values_for_individuals = int(
+                input(
+                    "Enter number of random values for individual in virtual machine (approx. 16-64): "
+                )
+            )
         mutation_probability = float(input("Enter the mutation probability: "))
         max_generations = int(input("Enter the maximum number of generations: "))
         user_option = int(
@@ -21,10 +33,15 @@ def main():
             print("Invalid option. Please try again.")
             user_option = int(
                 input(
-                    "1. Generate a board from assignment\n2. Generate a custom board\n"
+                    "\n1. Generate a board from assignment\n2. Generate a custom board\n3. Exit\n"
                 )
-            )
+            )"""
         print()
+        individual_count = 20
+        random_values_for_individuals = 30
+        mutation_probability = 0.1
+        max_generations = 10
+        user_option = 1
 
         if user_option == 3:
             print("Exiting...")
