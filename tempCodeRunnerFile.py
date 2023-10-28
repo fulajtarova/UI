@@ -1,1 +1,0 @@
-dth = n * (cell_width + 1) + 1

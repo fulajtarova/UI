@@ -6,14 +6,10 @@ import game
 def main():
     while True:
         individual_count = int(input("Enter the number of individuals: "))
-        selection_type = input("Enter the selection/crossover type: ")
+        random_values_for_individuals = int(
+            input("Enter number of random values for individual in virtual machine: ")
+        )
         mutation_probability = float(input("Enter the mutation probability: "))
-        elitism = input("Enter the elitism y/n: ")
-        elitism_count = None
-        if elitism == "y":
-            elitism_count = int(
-                input("Enter the number of individuals to be selected for elitism: ")
-            )
         max_generations = int(input("Enter the maximum number of generations: "))
         user_option = int(
             input(
@@ -148,12 +144,10 @@ def main():
             board,
             board_size,
             individual_count,
-            selection_type,
             mutation_probability,
-            elitism,
-            elitism_count,
             max_generations,
             treasure_count,
+            random_values_for_individuals,
         )
 
 
