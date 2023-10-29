@@ -5,7 +5,7 @@ import game
 
 def main():
     while True:
-        user_option = 1
+        user_option = 9
 
         """ user_option = int(
             input(
@@ -13,7 +13,12 @@ def main():
             )
         )"""
 
-        while user_option != 1 and user_option != 2 and user_option != 3:
+        while (
+            user_option != 1
+            and user_option != 2
+            and user_option != 3
+            and user_option != 9
+        ):
             print("Invalid option. Please try again.")
             user_option = int(
                 input(
@@ -26,12 +31,12 @@ def main():
             print("Exiting...")
             exit()
         elif user_option == 1:
-            treasure_count = 5
+            treasure_count = 13
             board_size = 7
             board = [
                 0,
                 0,
-                0,
+                2,
                 0,
                 0,
                 0,
@@ -42,26 +47,23 @@ def main():
                 0,
                 2,
                 0,
-                0,
+                2,
                 0,
                 0,
                 2,
                 0,
+                2,
                 0,
                 0,
-                0,
-                0,
+                2,
                 0,
                 1,
                 0,
-                0,
-                0,
                 2,
                 0,
                 2,
                 0,
-                0,
-                0,
+                2,
                 0,
                 0,
                 0,
@@ -71,11 +73,14 @@ def main():
                 2,
                 0,
                 0,
+                2,
                 0,
                 0,
                 0,
                 0,
                 0,
+                2,
+                2,
                 0,
                 0,
             ]
@@ -131,6 +136,29 @@ def main():
                 0,
             ]"""
             printing.print_letter_board(board)
+        elif user_option == 9:
+            treasure_count = 5
+            board_size = 4
+            board = [
+                0,
+                0,
+                2,
+                0,
+                0,
+                2,
+                1,
+                0,
+                0,
+                2,
+                2,
+                0,
+                0,
+                2,
+                0,
+                0,
+            ]
+            printing.print_letter_board(board)
+
         else:
             board_size = int(input("Enter the board size: "))
 
