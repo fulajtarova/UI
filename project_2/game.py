@@ -19,12 +19,12 @@ def vm_create_random_values(n):
 def virtual_machine(individual, board, board_size, treasure_count):
     moves_list = []
     out_of_bounds = False
-    treasure_found = 0
+    treasure_found_num = 0
     register_index = 0
     for i in range(500):
         if register_index <= 63:
             opcode = individual[register_index][:2]
-            register_value = individual[register_index][2:]
+            register_value = bin(int(individual[register_index][2:], 2) + 1)[2:]
             if opcode == "00":
                 if register_value == "111111":
                     individual[register_index] = "00000000"
@@ -65,16 +65,16 @@ def virtual_machine(individual, board, board_size, treasure_count):
                     if not out_of_bounds:
                         moves_list.append("right")
                 if treasure_found:
-                    treasure_found += 1
+                    treasure_found_num += 1
         else:
             register_index = 0
 
-        if out_of_bounds or treasure_found == treasure_count:
+        if out_of_bounds or treasure_found_num == treasure_count:
             break
 
-    fitness = treasure_found / (len(moves_list) + 1)
+    fitness = treasure_found_num / (len(moves_list) + 1)
 
-    individual_object = Individual(individual, fitness, moves_list)
+    individual_object = Individual(individual, fitness, moves_list, board)
 
     return individual_object
 

@@ -19,6 +19,7 @@ def print_number_board(n):
 
     # Print the bottom border of the board
     print("+" + "-" * (board_width - 2) + "+")
+    print("\n")
 
 
 def print_letter_board(board):
@@ -48,3 +49,4 @@ def print_letter_board(board):
 
     # Print the bottom border of the board
     print("+" + "-" * (board_width - 2) + "+")
+    print("\n")

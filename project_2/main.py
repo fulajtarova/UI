@@ -5,21 +5,6 @@ import game
 
 def main():
     while True:
-        individual_count = int(input("Enter the number of individuals (approx. 20): "))
-        random_values_for_individuals = int(
-            input(
-                "Enter number of random values for individual in virtual machine (approx. 16-64): "
-            )
-        )
-        while random_values_for_individuals > 64:
-            print("Invalid number of random values. Please try again.")
-            random_values_for_individuals = int(
-                input(
-                    "Enter number of random values for individual in virtual machine (approx. 16-64): "
-                )
-            )
-        mutation_probability = float(input("Enter the mutation probability: "))
-        max_generations = int(input("Enter the maximum number of generations: "))
         user_option = int(
             input(
                 "\n1. Generate a board from assignment\n2. Generate a custom board\n3. Exit\n"
@@ -153,6 +138,22 @@ def main():
                     treasure_count += 1
 
             printing.print_letter_board(board)
+
+        individual_count = int(input("Enter the number of individuals (approx. 20): "))
+        random_values_for_individuals = int(
+            input(
+                "Enter number of random values for individual in virtual machine (approx. 50): "
+            )
+        )
+        while random_values_for_individuals > 64:
+            print("Invalid number of random values. Please try again.")
+            random_values_for_individuals = int(
+                input(
+                    "Enter number of random values for individual in virtual machine (approx. 50): "
+                )
+            )
+        mutation_probability = float(input("Enter the mutation probability: "))
+        max_generations = int(input("Enter the maximum number of generations: "))
 
         game.play_game(
             board,
