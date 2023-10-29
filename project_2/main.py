@@ -52,6 +52,57 @@ def main():
                 0,
                 0,
                 0,
+                1,
+                0,
+                0,
+                0,
+                2,
+                0,
+                2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+            ]
+            """board = [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                2,
+                0,
+                0,
+                0,
+                0,
+                2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
                 0,
                 0,
                 0,
@@ -78,7 +129,7 @@ def main():
                 0,
                 0,
                 0,
-            ]
+            ]"""
             printing.print_letter_board(board)
         else:
             board_size = int(input("Enter the board size: "))
@@ -160,12 +211,12 @@ def main():
         elite_individual_count = int(individual_count * elitism_coun_percentage)
         max_generations = int(input("Enter the maximum number of generations: "))"""
 
-        individual_count = 30
-        random_values_for_individuals = 64
-        mutation_probability = 50
-        elitism_coun_percentage = 0.3
+        individual_count = 40
+        random_values_for_individuals = 60
+        mutation_probability = 0.15
+        elitism_coun_percentage = 0.5
         elite_individual_count = int(individual_count * elitism_coun_percentage)
-        max_generations = 150
+        max_generations = 200
         user_option = 1
 
         game.play_game(
