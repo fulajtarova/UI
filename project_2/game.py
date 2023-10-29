@@ -1,6 +1,7 @@
 import random
 import printing
 import moves
+from individual import Individual
 
 
 def vm_create_random_values(n):
@@ -15,58 +16,67 @@ def vm_create_random_values(n):
     return values_random_list
 
 
-def vm_individual_to_moves(individual, board, board_size):
+def virtual_machine(individual, board, board_size, treasure_count):
     moves_list = []
-    instruction_count = 0
     out_of_bounds = False
-    treasure_found = False
-    for i, instruction in enumerate(individual):
-        opcode = instruction[:2]
-        register = bin(int(instruction[2:], 2))[2:]
-        if opcode == "00":
-            instruction_count += 1
-            if register == "111111":
-                individual[i] = "00000000"
-            else:
-                register_bin = bin(int(register, 2) + 1)[2:].zfill(6)
-                whole_register = opcode + register_bin
-                individual[i] = whole_register
-        elif opcode == "01":
-            instruction_count += 1
-            if register == "0":
-                individual[i] = "01111111"
-            else:
-                register_bin = bin(int(register, 2) - 1)[2:].zfill(6)
-                whole_register = opcode + register_bin
-                individual[i] = whole_register
-        elif opcode == "10":
-            instruction_count += 1
-            jump_index = int(register, 2)
-            # Jump (execute the register)
-        elif opcode == "11":
-            instruction_count += 1
-            ones_count = instruction.count("1")
-            if ones_count <= 2:
-                board, out_of_bounds, treasure_found = moves.up(board, board_size)
-                if not out_of_bounds:
-                    moves_list.append("up")
-            elif ones_count <= 4:
-                board, out_of_bounds, treasure_found = moves.down(board, board_size)
-                if not out_of_bounds:
-                    moves_list.append("down")
-            elif ones_count <= 6:
-                board, out_of_bounds, treasure_found = moves.left(board, board_size)
-                if not out_of_bounds:
-                    moves_list.append("left")
-            else:
-                board, out_of_bounds, treasure_found = moves.right(board, board_size)
-                if not out_of_bounds:
-                    moves_list.append("right")
+    treasure_found = 0
+    register_index = 0
+    for i in range(500):
+        if register_index <= 63:
+            opcode = individual[register_index][:2]
+            register_value = individual[register_index][2:]
+            if opcode == "00":
+                if register_value == "111111":
+                    individual[register_index] = "00000000"
+                else:
+                    register_bin = bin(int(register_value, 2) + 1)[2:].zfill(6)
+                    individual[register_index] = opcode + register_bin
+                register_index += 1
 
-        if out_of_bounds or treasure_found or instruction_count > 500:
+            elif opcode == "01":
+                if register_value == "0":
+                    individual[register_index] = "01111111"
+                else:
+                    register_bin = bin(int(register_value, 2) - 1)[2:].zfill(6)
+                    individual[register_index] = opcode + register_bin
+                register_index += 1
+
+            elif opcode == "10":
+                register_index = int(register_value, 2)
+
+            elif opcode == "11":
+                ones_count = individual[i].count("1")
+                if ones_count <= 2:
+                    board, out_of_bounds, treasure_found = moves.up(board, board_size)
+                    if not out_of_bounds:
+                        moves_list.append("up")
+                elif ones_count <= 4:
+                    board, out_of_bounds, treasure_found = moves.down(board, board_size)
+                    if not out_of_bounds:
+                        moves_list.append("down")
+                elif ones_count <= 6:
+                    board, out_of_bounds, treasure_found = moves.left(board, board_size)
+                    if not out_of_bounds:
+                        moves_list.append("left")
+                else:
+                    board, out_of_bounds, treasure_found = moves.right(
+                        board, board_size
+                    )
+                    if not out_of_bounds:
+                        moves_list.append("right")
+                if treasure_found:
+                    treasure_found += 1
+        else:
+            register_index = 0
+
+        if out_of_bounds or treasure_found == treasure_count:
             break
 
-    return moves_list
+    fitness = treasure_found / (len(moves_list) + 1)
+
+    individual_object = Individual(individual, fitness, moves_list)
+
+    return individual_object
 
 
 def play_game(
@@ -78,11 +88,12 @@ def play_game(
     treasure_count,
     random_values_for_individuals,
 ):
-    for individual in range(individual_count):
-        board_copy = board.copy()
-        individual_values = vm_create_random_values(random_values_for_individuals)
-        print(individual_values)
-        individual_moves = vm_individual_to_moves(
-            individual_values, board_copy, board_size
-        )
-        print(individual_moves)
+    for generation in range(max_generations):
+        generation_list = []
+        for individual in range(individual_count):
+            board_copy = board.copy()
+            individual_values = vm_create_random_values(random_values_for_individuals)
+            individual_object = virtual_machine(
+                individual_values, board_copy, board_size, treasure_count
+            )
+            generation_list.append(individual_object)

@@ -4,11 +4,8 @@ import game
 
 
 def main():
-    num = bin(11)
-    num_plus_one = num + bin(1)
-    print(num_plus_one)
     while True:
-        """individual_count = int(input("Enter the number of individuals (approx. 20): "))
+        individual_count = int(input("Enter the number of individuals (approx. 20): "))
         random_values_for_individuals = int(
             input(
                 "Enter number of random values for individual in virtual machine (approx. 16-64): "
@@ -35,13 +32,13 @@ def main():
                 input(
                     "\n1. Generate a board from assignment\n2. Generate a custom board\n3. Exit\n"
                 )
-            )"""
+            )
         print()
-        individual_count = 20
+        """individual_count = 20
         random_values_for_individuals = 30
         mutation_probability = 0.1
         max_generations = 10
-        user_option = 1
+        user_option = 1"""
 
         if user_option == 3:
             print("Exiting...")
