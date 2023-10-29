@@ -139,7 +139,7 @@ def main():
 
             printing.print_letter_board(board)
 
-        individual_count = int(input("Enter the number of individuals (approx. 20): "))
+        individual_count = int(input("Enter the number of individuals (approx. 30): "))
         random_values_for_individuals = int(
             input(
                 "Enter number of random values for individual in virtual machine (approx. 50): "
@@ -152,7 +152,15 @@ def main():
                     "Enter number of random values for individual in virtual machine (approx. 50): "
                 )
             )
-        mutation_probability = float(input("Enter the mutation probability: "))
+        mutation_probability = (
+            float(input("Enter the mutation probability percentage (approx. 50): "))
+            / 100
+        )
+        elitism_coun_percentage = (
+            float(input("Enter the elitism percentage in a population (approx. 30): "))
+            / 100
+        )
+        elite_individual_count = int(individual_count * elitism_coun_percentage)
         max_generations = int(input("Enter the maximum number of generations: "))
 
         game.play_game(
@@ -163,6 +171,7 @@ def main():
             max_generations,
             treasure_count,
             random_values_for_individuals,
+            elite_individual_count,
         )
 
 
