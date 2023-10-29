@@ -27,7 +27,7 @@ def virtual_machine(individual, board, board_size, treasure_count):
             register_value = bin(int(individual[register_index][2:], 2) + 1)[2:]
             if opcode == "00":
                 if register_value == "111111":
-                    individual[register_index] = "00000000"
+                    individual[register_index] = "01000000"
                 else:
                     register_bin = bin(int(register_value, 2) + 1)[2:].zfill(6)
                     individual[register_index] = opcode + register_bin
@@ -35,7 +35,7 @@ def virtual_machine(individual, board, board_size, treasure_count):
 
             elif opcode == "01":
                 if register_value == "0":
-                    individual[register_index] = "01111111"
+                    individual[register_index] = "00111111"
                 else:
                     register_bin = bin(int(register_value, 2) - 1)[2:].zfill(6)
                     individual[register_index] = opcode + register_bin
@@ -74,7 +74,7 @@ def virtual_machine(individual, board, board_size, treasure_count):
 
     fitness = treasure_found_num / (len(moves_list) + 1)
 
-    individual_object = Individual(individual, fitness, moves_list, board)
+    individual_object = Individual(individual, fitness, moves_list)
 
     return individual_object
 
