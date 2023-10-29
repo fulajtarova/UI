@@ -2,6 +2,7 @@ import random
 import printing
 import moves
 from individual import Individual
+import copy
 
 
 def vm_create_random_values(n):
@@ -18,6 +19,7 @@ def vm_create_random_values(n):
 
 def virtual_machine(individual, board, board_size, treasure_count):
     moves_list = []
+    individual_copy = individual.copy()
     out_of_bounds = False
     treasure_found_num = 0
     register_index = 0
@@ -74,7 +76,7 @@ def virtual_machine(individual, board, board_size, treasure_count):
 
     fitness = treasure_found_num / (len(moves_list) + 1)
 
-    individual_object = Individual(individual, fitness, moves_list)
+    individual_object = Individual(individual_copy, fitness, moves_list)
 
     solution_found = False
     if treasure_found_num == treasure_count:
@@ -127,17 +129,33 @@ def crossover(mutation_list):
     crossover_list = []
     for i, individual in enumerate(mutation_list):
         if i == len(mutation_list) - 1:
-            parent_1 = mutation_list[i][4:]
-            parent_2 = mutation_list[0][:4]
+            parent_1 = mutation_list[i][32:]
+            parent_2 = mutation_list[0][:32]
             child = parent_1 + parent_2
             crossover_list.append(child)
         else:
-            parent_1 = mutation_list[i][4:]
-            parent_2 = mutation_list[i + 1][:4]
+            parent_1 = mutation_list[i][32:]
+            parent_2 = mutation_list[i + 1][:32]
             child = parent_1 + parent_2
             crossover_list.append(child)
 
     return crossover_list
+
+
+def make_other_generations(generation_list_values, board, board_size, treasure_count):
+    solution_path = None
+    generation_list_object = []
+    solution_found = False
+    for individual in generation_list_values:
+        individual_object, solution_found = virtual_machine(
+            individual, board, board_size, treasure_count
+        )
+        generation_list_object.append(individual_object)
+        if solution_found:
+            solution_path = individual_object.moves_list
+            break
+
+    return generation_list_object, solution_path
 
 
 def play_game(
@@ -160,42 +178,68 @@ def play_game(
         treasure_count,
     )
 
+    generation_list_object = first_generation_list
+
     if solution_path is not None:
         print("Solution found!")
         print("Solution path: ")
         print(solution_path)
         return
 
-    generation_list = first_generation_list
-
-    for generation in range(max_generations - 1):
+    for one in range(max_generations):
         if solution_found:
             break
 
-        generation_list.sort(key=lambda x: x.fitness, reverse=True)
+        generation_list_object.sort(key=lambda x: x.fitness, reverse=True)
 
-        elite_individuals = generation_list[:elite_individual_count]
-        other_individuals = generation_list[elite_individual_count:]
+        print("Generation: ", one + 1)
+        for element in generation_list_object:
+            print(element.fitness, element.moves_list)
+        print()
 
-        new_generation_list = []
-        for individual in elite_individuals:
-            new_generation_list.append(individual.value)
+        elite_individuals = []
+        other_individuals = []
+        elite_individuals = copy.deepcopy(
+            generation_list_object[:elite_individual_count]
+        )
 
-        generation_list = new_generation_list
+        other_individuals = copy.deepcopy(
+            generation_list_object[elite_individual_count:]
+        )
 
-        # mame zmutovanych jedincov
+        # Replicate elite individuals and add to the other individuals
+        for _ in range(individual_count - elite_individual_count):
+            elite_individuals_copy = copy.deepcopy(elite_individuals)
+            other_individuals.extend(elite_individuals_copy)
+
+        next_generation_list_object = []
+        next_generation_list_object = elite_individuals
+
+        # mutation
+        mutation_list = []
         mutation_list = mutation(other_individuals, mutation_probability)
 
         # crossover
+        crossover_list = []
         crossover_list = crossover(mutation_list)
 
-        # virtual machine for each individual
+        generation_list_values = []
+        generation_list_values = crossover_list
 
-    if solution_found:
-        print("Solution found!")
-        print("Solution path: ")
-        print(solution_path)
-    else:
-        print("Solution not found.")
-        print("Best individual: ")
-        print(generation_list[0].moves_list)
+        # virtual machine for each individual
+        generation_other_list_object, solution_path = make_other_generations(
+            generation_list_values, board, board_size, treasure_count
+        )
+        if solution_path is not None:
+            print("Solution found!")
+            print("Solution path: ")
+            print(solution_path)
+            return
+
+        next_generation_list_object += generation_other_list_object
+
+        generation_list_object = next_generation_list_object
+
+    print("Solution not found.")
+    print("Best individual: ")
+    print(generation_list_object[0].moves_list)

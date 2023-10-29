@@ -5,11 +5,13 @@ import game
 
 def main():
     while True:
-        user_option = int(
+        user_option = 1
+
+        """ user_option = int(
             input(
                 "\n1. Generate a board from assignment\n2. Generate a custom board\n3. Exit\n"
             )
-        )
+        )"""
 
         while user_option != 1 and user_option != 2 and user_option != 3:
             print("Invalid option. Please try again.")
@@ -19,11 +21,6 @@ def main():
                 )
             )
         print()
-        """individual_count = 20
-        random_values_for_individuals = 30
-        mutation_probability = 0.1
-        max_generations = 10
-        user_option = 1"""
 
         if user_option == 3:
             print("Exiting...")
@@ -139,7 +136,7 @@ def main():
 
             printing.print_letter_board(board)
 
-        individual_count = int(input("Enter the number of individuals (approx. 30): "))
+        """individual_count = int(input("Enter the number of individuals (approx. 30): "))
         random_values_for_individuals = int(
             input(
                 "Enter number of random values for individual in virtual machine (approx. 50): "
@@ -161,7 +158,15 @@ def main():
             / 100
         )
         elite_individual_count = int(individual_count * elitism_coun_percentage)
-        max_generations = int(input("Enter the maximum number of generations: "))
+        max_generations = int(input("Enter the maximum number of generations: "))"""
+
+        individual_count = 30
+        random_values_for_individuals = 64
+        mutation_probability = 50
+        elitism_coun_percentage = 0.3
+        elite_individual_count = int(individual_count * elitism_coun_percentage)
+        max_generations = 150
+        user_option = 1
 
         game.play_game(
             board,
@@ -173,6 +178,7 @@ def main():
             random_values_for_individuals,
             elite_individual_count,
         )
+        return
 
 
 if __name__ == "__main__":
