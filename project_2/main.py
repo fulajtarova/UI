@@ -5,7 +5,7 @@ import game
 
 def main():
     while True:
-        user_option = 9
+        user_option = 1
 
         """ user_option = int(
             input(
@@ -31,11 +31,36 @@ def main():
             print("Exiting...")
             exit()
         elif user_option == 1:
-            treasure_count = 13
+            treasure_count = 5
             board_size = 7
             board = [
                 0,
                 0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                2,
+                0,
+                0,
+                0,
+                0,
+                2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
                 2,
                 0,
                 0,
@@ -47,94 +72,19 @@ def main():
                 0,
                 2,
                 0,
-                2,
-                0,
-                0,
-                2,
                 0,
                 2,
                 0,
                 0,
-                2,
+                0,
+                0,
                 0,
                 1,
                 0,
-                2,
-                0,
-                2,
-                0,
-                2,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                2,
-                0,
-                0,
-                2,
-                0,
-                0,
-                0,
-                0,
-                0,
-                2,
-                2,
                 0,
                 0,
             ]
-            """board = [
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                2,
-                0,
-                0,
-                0,
-                0,
-                2,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                2,
-                0,
-                2,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                2,
-                0,
-                0,
-                0,
-                0,
-                0,
-                1,
-                0,
-                0,
-                0,
-            ]"""
+
             printing.print_letter_board(board)
         elif user_option == 9:
             treasure_count = 5
@@ -239,12 +189,12 @@ def main():
         elite_individual_count = int(individual_count * elitism_coun_percentage)
         max_generations = int(input("Enter the maximum number of generations: "))"""
 
-        individual_count = 40
+        individual_count = 30
         random_values_for_individuals = 60
-        mutation_probability = 0.15
-        elitism_coun_percentage = 0.5
+        mutation_probability = 1
+        elitism_coun_percentage = 0.3
         elite_individual_count = int(individual_count * elitism_coun_percentage)
-        max_generations = 200
+        max_generations = 300
         user_option = 1
 
         game.play_game(

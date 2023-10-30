@@ -6,12 +6,6 @@ import copy
 
 def vm_create_random_values(n):
     values_random_list = []
-    half_with_11 = n // 2
-
-    """for _ in range(half_with_11):
-        num = "11"
-        num += "".join(random.choice("01") for _ in range(6))
-        values_random_list.append(num)"""
 
     for _ in range(n):
         num = "".join(random.choice("01") for _ in range(8))
@@ -106,21 +100,29 @@ def virtual_machine(individual, board, board_size, treasure_count):
 
 def mutation(other_generation_list, mutation_probability):
     mutation_list = []
+    """
+    for individual in other_generation_list:
+        mutated_individual = []
+        for byte in individual:
+            if random.random() < mutation_probability:
+                mutated_byte = "".join(random.choice("01") for _ in range(8))
+                mutated_individual.append(mutated_byte)
+            else:
+                mutated_individual.append(byte)
+        mutation_list.append(mutated_individual)
+    """
     for individual in other_generation_list:
         if random.random() < mutation_probability:
-            mutated_individual = []
-            for k, value in enumerate(individual):
-                if k % 4 == 0:
-                    mutated_value = "".join(
-                        bit if i % 2 == 0 else "1" if bit == "0" else "0"
-                        for i, bit in enumerate(value)
-                    )
-                    mutated_individual.append(mutated_value)
-                else:
-                    mutated_individual.append(value)
-            mutation_list.append(mutated_individual)
-        else:
-            mutation_list.append(individual)
+            for j in range(8):  # zmutovane byty v jednom jedinci
+                cell_index = random.randint(0, 63)
+                cell = individual[cell_index]
+                dec_byte = int(cell, 2)
+                for k in range(3):  # zmutovane bity v jednom byte
+                    mask = 1 << random.randint(0, 7)
+                    cell = dec_byte ^ mask
+                    dec_byte = cell
+                individual[cell_index] = bin(cell)[2:].zfill(8)
+        mutation_list.append(individual)
 
     return mutation_list
 
@@ -130,6 +132,8 @@ def crossover(elite_individuals, individual_count, elite_individual_count):
     while len(subelite_individuals) != (individual_count - elite_individual_count):
         parent_1 = random.choice(elite_individuals)
         parent_2 = random.choice(elite_individuals)
+        while parent_1 == parent_2:
+            parent_2 = random.choice(elite_individuals)
         parent_1_values = parent_1.value
         parent_2_values = parent_2.value
         r_num = random.randint(1, 64)
@@ -185,6 +189,36 @@ def make_other_generations(generation_list_values, board, board_size, treasure_c
     return generation_list_object, solution_path
 
 
+def tournament(generation_list_object, individual_count):
+    potential_parent1 = random.choice(generation_list_object)
+    potential_parent2 = random.choice(generation_list_object)
+    while potential_parent1 == potential_parent2:
+        potential_parent2 = random.choice(generation_list_object)
+
+    potential_parent3 = random.choice(generation_list_object)
+    while (
+        potential_parent3 == potential_parent1 or potential_parent3 == potential_parent2
+    ):
+        potential_parent3 = random.choice(generation_list_object)
+    potential_parent4 = random.choice(generation_list_object)
+    while (
+        potential_parent4 == potential_parent1
+        or potential_parent4 == potential_parent2
+        or potential_parent4 == potential_parent3
+    ):
+        potential_parent4 = random.choice(generation_list_object)
+
+    if potential_parent1.fitness >= potential_parent2.fitness:
+        parent1 = potential_parent1
+    else:
+        parent1 = potential_parent2
+
+    if potential_parent3.fitness >= potential_parent4.fitness:
+        parent2 = potential_parent3
+    else:
+        parent2 = potential_parent4
+
+
 def play_game(
     board,
     board_size,
@@ -227,10 +261,22 @@ def play_game(
             print(element.treasure_found_num, element.fitness, element.moves_list)
         print()
 
+        """# vyber najlepsich
+        elite_individuals = []
+        elite_individuals = copy.deepcopy(generation_list_object[:3])
+
+        other_individuals = []
+        other_individuals = copy.deepcopy(generation_list_object[3:])"""
         elite_individuals = []
         elite_individuals = copy.deepcopy(
             generation_list_object[:elite_individual_count]
         )
+
+        """# turnament
+        tournament_list = []
+        tournament_list = tournament(
+            copy.deepcopy(generation_list_object), individual_count
+        )"""
 
         subelite_individuals = []
         subelite_individuals = crossover(
