@@ -2,6 +2,11 @@ import random
 import moves
 from individual import Individual
 import copy
+import printing
+
+
+global solution_individual
+solution_individual = None
 
 
 def vm_create_random_values(n):
@@ -58,20 +63,26 @@ def virtual_machine(individual, board, board_size, treasure_count):
                 new_register_value = individual[new_register_index]
                 ones_count = new_register_value.count("1")
                 if ones_count <= 2:
-                    board, out_of_bounds, treasure_found = moves.up(board, board_size)
+                    board_copy, out_of_bounds, treasure_found = moves.up(
+                        board_copy, board_size
+                    )
                     if not out_of_bounds:
                         moves_list.append("up")
                 elif ones_count <= 4:
-                    board, out_of_bounds, treasure_found = moves.down(board, board_size)
+                    board_copy, out_of_bounds, treasure_found = moves.down(
+                        board_copy, board_size
+                    )
                     if not out_of_bounds:
                         moves_list.append("down")
                 elif ones_count <= 6:
-                    board, out_of_bounds, treasure_found = moves.left(board, board_size)
+                    board_copy, out_of_bounds, treasure_found = moves.left(
+                        board_copy, board_size
+                    )
                     if not out_of_bounds:
                         moves_list.append("left")
                 else:
-                    board, out_of_bounds, treasure_found = moves.right(
-                        board, board_size
+                    board_copy, out_of_bounds, treasure_found = moves.right(
+                        board_copy, board_size
                     )
                     if not out_of_bounds:
                         moves_list.append("right")
@@ -80,7 +91,6 @@ def virtual_machine(individual, board, board_size, treasure_count):
                 register_index += 1
         else:
             register_index = 0
-
         if out_of_bounds or treasure_found_num == treasure_count:
             break
 
@@ -88,40 +98,28 @@ def virtual_machine(individual, board, board_size, treasure_count):
     fitness = treasure_found_num
 
     individual_object = Individual(
-        individual_copy, fitness, moves_list, treasure_found_num
+        individual_copy, fitness, moves_list, treasure_found_num, board_copy
     )
 
-    solution_found = False
     if treasure_found_num == treasure_count:
-        solution_found = True
+        global solution_individual
+        solution_individual = individual_object
 
-    return individual_object, solution_found
+    return individual_object
 
 
 def mutation(other_generation_list, mutation_probability):
     mutation_list = []
-    """
     for individual in other_generation_list:
-        mutated_individual = []
-        for byte in individual:
-            if random.random() < mutation_probability:
-                mutated_byte = "".join(random.choice("01") for _ in range(8))
-                mutated_individual.append(mutated_byte)
-            else:
-                mutated_individual.append(byte)
-        mutation_list.append(mutated_individual)
-    """
-    for individual in other_generation_list:
-        if random.random() < mutation_probability:
-            for j in range(8):  # zmutovane byty v jednom jedinci
-                cell_index = random.randint(0, 63)
-                cell = individual[cell_index]
-                dec_byte = int(cell, 2)
-                for k in range(3):  # zmutovane bity v jednom byte
-                    mask = 1 << random.randint(0, 7)
-                    cell = dec_byte ^ mask
-                    dec_byte = cell
-                individual[cell_index] = bin(cell)[2:].zfill(8)
+        for j in range(mutation_probability):  # zmutovane byty v jednom jedinci
+            cell_index = random.randint(0, 63)
+            cell = individual[cell_index]
+            dec_byte = int(cell, 2)
+            for k in range(3):  # zmutovane bity v jednom byte
+                mask = 1 << random.randint(0, 7)
+                cell = dec_byte ^ mask
+                dec_byte = cell
+            individual[cell_index] = bin(cell)[2:].zfill(8)
         mutation_list.append(individual)
 
     return mutation_list
@@ -156,67 +154,33 @@ def make_first_generation(
 ):
     generation_list_object = []
 
-    solution_path = None
+    global solution_individual
 
     for i in range(individual_count):
-        board_copy = board.copy()
-        individual_values = vm_create_random_values(random_values_for_individuals)
-        individual_object, solution_found = virtual_machine(
-            individual_values, board_copy, board_size, treasure_count
-        )
-        generation_list_object.append(individual_object)
-        if solution_found:
-            solution_path = individual_object.moves_list
-            break
+        if solution_individual is None:
+            board_copy = board.copy()
+            individual_values = vm_create_random_values(random_values_for_individuals)
+            individual_object = virtual_machine(
+                individual_values, board_copy, board_size, treasure_count
+            )
+            generation_list_object.append(individual_object)
 
-    return generation_list_object, solution_path
+    return generation_list_object
 
 
 def make_other_generations(generation_list_values, board, board_size, treasure_count):
-    solution_path = None
     generation_list_object = []
-    solution_found = False
+
+    global solution_individual
     for individual in generation_list_values:
-        board_copy = board.copy()
-        individual_object, solution_found = virtual_machine(
-            individual, board_copy, board_size, treasure_count
-        )
-        generation_list_object.append(individual_object)
-        if solution_found:
-            solution_path = individual_object.moves_list
-            break
+        if solution_individual is None:
+            board_copy = board.copy()
+            individual_object = virtual_machine(
+                individual, board_copy, board_size, treasure_count
+            )
+            generation_list_object.append(individual_object)
 
-    return generation_list_object, solution_path
-
-
-def tournament(generation_list_object, individual_count):
-    potential_parent1 = random.choice(generation_list_object)
-    potential_parent2 = random.choice(generation_list_object)
-    while potential_parent1 == potential_parent2:
-        potential_parent2 = random.choice(generation_list_object)
-
-    potential_parent3 = random.choice(generation_list_object)
-    while (
-        potential_parent3 == potential_parent1 or potential_parent3 == potential_parent2
-    ):
-        potential_parent3 = random.choice(generation_list_object)
-    potential_parent4 = random.choice(generation_list_object)
-    while (
-        potential_parent4 == potential_parent1
-        or potential_parent4 == potential_parent2
-        or potential_parent4 == potential_parent3
-    ):
-        potential_parent4 = random.choice(generation_list_object)
-
-    if potential_parent1.fitness >= potential_parent2.fitness:
-        parent1 = potential_parent1
-    else:
-        parent1 = potential_parent2
-
-    if potential_parent3.fitness >= potential_parent4.fitness:
-        parent2 = potential_parent3
-    else:
-        parent2 = potential_parent4
+    return generation_list_object
 
 
 def play_game(
@@ -229,11 +193,9 @@ def play_game(
     random_values_count_for_individuals,
     elite_individual_count,
 ):
-    solution_found = False
-
     board_copy = board.copy()
 
-    first_generation_list, solution_path = make_first_generation(
+    first_generation_list = make_first_generation(
         board_copy,
         individual_count,
         random_values_count_for_individuals,
@@ -243,57 +205,32 @@ def play_game(
 
     generation_list_object = first_generation_list
 
-    if solution_path is not None:
-        print("Solution found!")
-        print("Solution path: ")
-        print(solution_path)
-        return
+    global generation_num
+    generation_num = 1
 
     # for one in range(max_generations):
-    for one in range(max_generations):
-        if solution_found:
-            break
-
+    while solution_individual is None and generation_num < max_generations:
+        generation_num += 1
         generation_list_object.sort(key=lambda x: x.fitness, reverse=True)
 
-        print("Generation: ", one + 1)
-        for element in generation_list_object:
-            print(element.treasure_found_num, element.fitness, element.moves_list)
-        print()
-
-        """# vyber najlepsich
-        elite_individuals = []
-        elite_individuals = copy.deepcopy(generation_list_object[:3])
-
-        other_individuals = []
-        other_individuals = copy.deepcopy(generation_list_object[3:])"""
         elite_individuals = []
         elite_individuals = copy.deepcopy(
             generation_list_object[:elite_individual_count]
         )
 
-        """# turnament
-        tournament_list = []
-        tournament_list = tournament(
-            copy.deepcopy(generation_list_object), individual_count
-        )"""
-
         subelite_individuals = []
         subelite_individuals = crossover(
-            copy.deepcopy(elite_individuals), individual_count, elite_individual_count
+            copy.deepcopy(elite_individuals),
+            individual_count,
+            elite_individual_count,
         )
 
         mutation_list = []
         mutation_list = mutation(subelite_individuals, mutation_probability)
 
-        subelite_list_objects, solution_path = make_other_generations(
+        subelite_list_objects = make_other_generations(
             mutation_list, board_copy, board_size, treasure_count
         )
-        if solution_path is not None:
-            print("Solution found!")
-            print("Solution path: ")
-            print(solution_path)
-            return
 
         population_list_object = []
         population_list_object = copy.deepcopy(elite_individuals)
@@ -301,6 +238,18 @@ def play_game(
 
         generation_list_object = population_list_object
 
-    print("Solution not found.")
-    print("Best individual: ")
-    print(generation_list_object[0].moves_list)
+    if solution_individual is not None:
+        print("\nSolution found.")
+        print(f"\nGeneration number: {generation_num}")
+        print("Solution path: ")
+        print(solution_individual.moves_list)
+        print("Solution board: ")
+        printing.print_letter_board(solution_individual.board)
+
+    else:
+        print("\nSolution not found.")
+        print(f"Generation number: {generation_num}")
+        print("Best solution path: ")
+        print(generation_list_object[0].moves_list)
+        print("Best solution board: ")
+        printing.print_letter_board(generation_list_object[0].board)

@@ -5,20 +5,13 @@ import game
 
 def main():
     while True:
-        user_option = 1
-
-        """ user_option = int(
+        user_option = int(
             input(
                 "\n1. Generate a board from assignment\n2. Generate a custom board\n3. Exit\n"
             )
-        )"""
+        )
 
-        while (
-            user_option != 1
-            and user_option != 2
-            and user_option != 3
-            and user_option != 9
-        ):
+        while user_option != 1 and user_option != 2 and user_option != 3:
             print("Invalid option. Please try again.")
             user_option = int(
                 input(
@@ -86,28 +79,6 @@ def main():
             ]
 
             printing.print_letter_board(board)
-        elif user_option == 9:
-            treasure_count = 5
-            board_size = 4
-            board = [
-                0,
-                0,
-                2,
-                0,
-                0,
-                2,
-                1,
-                0,
-                0,
-                2,
-                2,
-                0,
-                0,
-                2,
-                0,
-                0,
-            ]
-            printing.print_letter_board(board)
 
         else:
             board_size = int(input("Enter the board size: "))
@@ -165,37 +136,27 @@ def main():
 
             printing.print_letter_board(board)
 
-        """individual_count = int(input("Enter the number of individuals (approx. 30): "))
+        individual_count = int(input("Enter the number of individuals (30): "))
         random_values_for_individuals = int(
             input(
-                "Enter number of random values for individual in virtual machine (approx. 50): "
+                "Enter number of random values for individual in virtual machine (60): "
             )
         )
         while random_values_for_individuals > 64:
             print("Invalid number of random values. Please try again.")
             random_values_for_individuals = int(
                 input(
-                    "Enter number of random values for individual in virtual machine (approx. 50): "
+                    "Enter number of random values for individual in virtual machine (60): "
                 )
             )
-        mutation_probability = (
-            float(input("Enter the mutation probability percentage (approx. 50): "))
-            / 100
+        mutation_probability = int(
+            float(input("Enter the mutation probability percentage (10): ")) / 100 * 64
         )
-        elitism_coun_percentage = (
-            float(input("Enter the elitism percentage in a population (approx. 30): "))
-            / 100
+        elitism_count_percentage = (
+            float(input("Enter the elitism percentage in a population (30): ")) / 100
         )
-        elite_individual_count = int(individual_count * elitism_coun_percentage)
-        max_generations = int(input("Enter the maximum number of generations: "))"""
-
-        individual_count = 30
-        random_values_for_individuals = 60
-        mutation_probability = 1
-        elitism_coun_percentage = 0.3
-        elite_individual_count = int(individual_count * elitism_coun_percentage)
-        max_generations = 300
-        user_option = 1
+        elite_individual_count = int(individual_count * elitism_count_percentage)
+        max_generations = int(input("Enter the maximum number of generations (1000): "))
 
         game.play_game(
             board,
@@ -207,7 +168,6 @@ def main():
             random_values_for_individuals,
             elite_individual_count,
         )
-        return
 
 
 if __name__ == "__main__":
