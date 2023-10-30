@@ -50,3 +50,31 @@ def print_letter_board(board):
     # Print the bottom border of the board
     print("+" + "-" * (board_width - 2) + "+")
     print("\n")
+
+
+def up(board, n):
+    start_index = board.index(1)
+    board[start_index - n] = 1
+    board[start_index] = 3
+    return board
+
+
+def down(board, n):
+    start_index = board.index(1)
+    board[start_index + n] = 1
+    board[start_index] = 3
+    return board
+
+
+def left(board, n):
+    start_index = board.index(1)
+    board[start_index - 1] = 1
+    board[start_index] = 3
+    return board
+
+
+def right(board, n):
+    start_index = board.index(1)
+    board[start_index + 1] = 1
+    board[start_index] = 3
+    return board

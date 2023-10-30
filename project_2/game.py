@@ -3,6 +3,7 @@ import moves
 from individual import Individual
 import copy
 import printing
+import move_animation
 
 
 global solution_individual
@@ -245,6 +246,7 @@ def play_game(
         print(solution_individual.moves_list)
         print("Solution board: ")
         printing.print_letter_board(solution_individual.board)
+        move_animation.animation(board_copy, board_size, solution_individual.moves_list)
 
     else:
         print("\nSolution not found.")
@@ -253,3 +255,6 @@ def play_game(
         print(generation_list_object[0].moves_list)
         print("Best solution board: ")
         printing.print_letter_board(generation_list_object[0].board)
+        move_animation.animation(
+            board_copy, board_size, generation_list_object[0].moves_list
+        )
