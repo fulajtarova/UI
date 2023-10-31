@@ -174,7 +174,11 @@ def main():
         elite_individual_count = int(individual_count * elitism_count_percentage)
         max_generations = int(input("Enter the maximum number of generations (1000): "))
 
-        animation = int(input("Do you want to see the animation? (1 - Yes, 2 - No): "))
+        animation = int(
+            input(
+                "Do you want to see the animation if solution is found? (1 - Yes, 2 - No): "
+            )
+        )
 
         game.play_game(
             board,

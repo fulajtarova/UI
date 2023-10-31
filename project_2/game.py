@@ -6,10 +6,6 @@ import printing
 import move_animation
 
 
-global solution_individual
-solution_individual = None
-
-
 def vm_create_random_values(n):
     values_random_list = []
 
@@ -242,6 +238,9 @@ def play_game(
     selection_type,
     animation,
 ):
+    global solution_individual
+    solution_individual = None
+
     board_copy = board.copy()
 
     first_generation_list = make_first_generation(
