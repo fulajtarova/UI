@@ -1,4 +1,4 @@
-import random
+import math
 import printing
 import game
 
@@ -19,7 +19,9 @@ def main():
     while True:
         user_option = int(
             input(
-                "\n1. Generate a board from assignment\n2. Generate a custom board\n3. Exit\n"
+                cyan
+                + "\n1. Generate a board from assignment\n2. Generate a custom board\n3. Exit\n"
+                + reset
             )
         )
 
@@ -27,7 +29,9 @@ def main():
             print("Invalid option. Please try again.")
             user_option = int(
                 input(
-                    "\n1. Generate a board from assignment\n2. Generate a custom board\n3. Exit\n"
+                    cyan
+                    + "\n1. Generate a board from assignment\n2. Generate a custom board\n3. Exit\n"
+                    + reset
                 )
             )
         print()
@@ -148,7 +152,7 @@ def main():
 
             printing.print_letter_board(board)
 
-        individual_count = int(input("Enter the number of individuals (30): "))
+        individual_count = int(input("Enter the number of individuals (50): "))
         random_values_for_individuals = int(
             input(
                 "Enter number of random values for individual in virtual machine (60): "
@@ -168,8 +172,12 @@ def main():
         mutation_probability = int(
             float(input("Enter the mutation probability percentage (10): ")) / 100 * 64
         )
+        mutation_probability = math.ceil(mutation_probability)
+        if mutation_probability == 0:
+            mutation_probability = 1
+
         elitism_count_percentage = (
-            float(input("Enter the elitism percentage in a population (30): ")) / 100
+            float(input("Enter the elitism percentage in a population (10): ")) / 100
         )
         elite_individual_count = int(individual_count * elitism_count_percentage)
         max_generations = int(input("Enter the maximum number of generations (1000): "))
