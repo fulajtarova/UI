@@ -79,7 +79,7 @@ def graph(generation_fitness_list):
     plt.bar(x, generation_fitness_list)
 
     plt.xlabel("Generation")
-    plt.ylabel("Fitness")
+    plt.ylabel("Fitness f=2/(moves+1) + 5*treasure_found")
 
     plt.show()
 

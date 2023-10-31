@@ -152,7 +152,7 @@ def main():
 
             printing.print_letter_board(board)
 
-        individual_count = int(input("Enter the number of individuals (50): "))
+        individual_count = int(input("Enter the number of individuals (40): "))
         random_values_for_individuals = int(
             input(
                 "Enter number of random values for individual in virtual machine (60): "
