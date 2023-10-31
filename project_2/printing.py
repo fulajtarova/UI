@@ -1,3 +1,6 @@
+import matplotlib.pyplot as plt
+
+
 def print_number_board(n):
     cell_width = len(str(n * n)) + 2  # Calculate the width for each cell
 
@@ -78,3 +81,16 @@ def right(board, n):
     board[start_index + 1] = 1
     board[start_index] = 3
     return board
+
+
+def graph(generation_fitness_list):
+    # Create a bar graph
+    x = range(1, len(generation_fitness_list) + 1)  # Start from 1
+    plt.bar(x, generation_fitness_list)
+
+    # Label the x and y axes
+    plt.xlabel("Generation")
+    plt.ylabel("Fitness")
+
+    # Show the graph
+    plt.show()

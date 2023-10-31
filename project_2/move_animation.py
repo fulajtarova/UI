@@ -48,6 +48,3 @@ def animation(board, board_size, path):
     canvas.after(
         1000, lambda: start_animation(path, board, board_size, cell_size, canvas)
     )
-
-    animation_duration = 4000 + len(path) * 500
-    root.after(animation_duration, root.destroy)

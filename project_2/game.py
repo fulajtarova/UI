@@ -126,18 +126,64 @@ def mutation(other_generation_list, mutation_probability):
     return mutation_list
 
 
-def crossover(elite_individuals, individual_count, elite_individual_count):
+def crossover(parent1, parent2):
+    r_num = random.randint(1, 64)
+    first_child = parent1[:r_num] + parent2[r_num:]
+    second_child = parent2[:r_num] + parent1[r_num:]
+    return first_child, second_child
+
+
+def roulette_wheel(generation_list_object, individual_count, elite_individual_count):
     subelite_individuals = []
+
+    total_fitness = sum(individual.fitness for individual in generation_list_object)
+
+    selection_probabilities = [
+        individual.fitness / total_fitness for individual in generation_list_object
+    ]
+
     while len(subelite_individuals) != (individual_count - elite_individual_count):
-        parent_1 = random.choice(elite_individuals)
-        parent_2 = random.choice(elite_individuals)
+        parent1 = random.choices(generation_list_object, selection_probabilities)[0]
+        parent2 = random.choices(generation_list_object, selection_probabilities)[0]
+
+        first_child, second_child = crossover(parent1.value, parent2.value)
+
+        if first_child not in subelite_individuals and len(
+            subelite_individuals
+        ) + 1 <= (individual_count - elite_individual_count):
+            subelite_individuals.append(first_child)
+        if second_child not in subelite_individuals and len(
+            subelite_individuals
+        ) + 1 <= (individual_count - elite_individual_count):
+            subelite_individuals.append(second_child)
+
+    return subelite_individuals
+
+
+def tournament_winner(generation_list_object, size_of_tournament):
+    tournament_list = []
+    for _ in range(size_of_tournament):
+        tournament_list.append(random.choice(generation_list_object))
+    tournament_list.sort(key=lambda x: x.fitness, reverse=True)
+    winner = tournament_list[0]
+    return winner
+
+
+def tournament(generation_list_object, individual_count, elite_individual_count):
+    subelite_individuals = []
+    size_of_tournament = random.randint(2, 5)
+    while len(subelite_individuals) != (individual_count - elite_individual_count):
+        parent_1 = tournament_winner(generation_list_object, size_of_tournament)
+        parent_2 = tournament_winner(generation_list_object, size_of_tournament)
+
         while parent_1 == parent_2:
-            parent_2 = random.choice(elite_individuals)
+            parent_2 = tournament_winner(generation_list_object, size_of_tournament)
+
         parent_1_values = parent_1.value
         parent_2_values = parent_2.value
-        r_num = random.randint(1, 64)
-        first_child = parent_1_values[:r_num] + parent_2_values[r_num:]
-        second_child = parent_2_values[:r_num] + parent_1_values[r_num:]
+
+        first_child, second_child = crossover(parent_1_values, parent_2_values)
+
         if first_child not in subelite_individuals and len(
             subelite_individuals
         ) + 1 <= (individual_count - elite_individual_count):
@@ -193,6 +239,8 @@ def play_game(
     treasure_count,
     random_values_count_for_individuals,
     elite_individual_count,
+    selection_type,
+    animation,
 ):
     board_copy = board.copy()
 
@@ -206,6 +254,8 @@ def play_game(
 
     generation_list_object = first_generation_list
 
+    best_fintness_generations = []
+
     global generation_num
     generation_num = 1
 
@@ -214,17 +264,26 @@ def play_game(
         generation_num += 1
         generation_list_object.sort(key=lambda x: x.fitness, reverse=True)
 
+        best_fintness_generations.append(generation_list_object[0].fitness)
+
         elite_individuals = []
         elite_individuals = copy.deepcopy(
             generation_list_object[:elite_individual_count]
         )
 
         subelite_individuals = []
-        subelite_individuals = crossover(
-            copy.deepcopy(elite_individuals),
-            individual_count,
-            elite_individual_count,
-        )
+        if selection_type == 1:
+            subelite_individuals = roulette_wheel(
+                copy.deepcopy(generation_list_object),
+                individual_count,
+                elite_individual_count,
+            )
+        else:
+            subelite_individuals = tournament(
+                copy.deepcopy(generation_list_object),
+                individual_count,
+                elite_individual_count,
+            )
 
         mutation_list = []
         mutation_list = mutation(subelite_individuals, mutation_probability)
@@ -239,22 +298,32 @@ def play_game(
 
         generation_list_object = population_list_object
 
+    print(len(best_fintness_generations))
+
     if solution_individual is not None:
         print("\nSolution found.")
         print(f"\nGeneration number: {generation_num}")
         print("Solution path: ")
         print(solution_individual.moves_list)
+        best_fintness_generations.append(solution_individual.fitness)
+        printing.graph(best_fintness_generations)
         print("Solution board: ")
         printing.print_letter_board(solution_individual.board)
-        move_animation.animation(board_copy, board_size, solution_individual.moves_list)
+        if animation == 1:
+            move_animation.animation(
+                board_copy, board_size, solution_individual.moves_list
+            )
 
     else:
         print("\nSolution not found.")
         print(f"Generation number: {generation_num}")
         print("Best solution path: ")
         print(generation_list_object[0].moves_list)
+        best_fintness_generations.append(generation_list_object[0].fitness)
+        printing.graph(best_fintness_generations)
         print("Best solution board: ")
         printing.print_letter_board(generation_list_object[0].board)
-        move_animation.animation(
-            board_copy, board_size, generation_list_object[0].moves_list
-        )
+        if animation == 1:
+            move_animation.animation(
+                board_copy, board_size, generation_list_object[0].moves_list
+            )
