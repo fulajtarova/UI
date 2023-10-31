@@ -161,15 +161,10 @@ def main():
                     "Enter number of random values for individual in virtual machine (60): "
                 )
             )
-        run_game = int(
-            input(
-                "Do you want to run the game for both selection types? (1 - Yes, 2 - No): "
-            )
+
+        selection_type = int(
+            input("Enter the selection type (1 - Roulette Wheel, 2 - Tournament): ")
         )
-        if run_game == 2:
-            selection_type = int(
-                input("Enter the selection type (1 - Roulette Wheel, 2 - Tournament): ")
-            )
         mutation_probability = int(
             float(input("Enter the mutation probability percentage (10): ")) / 100 * 64
         )
@@ -181,47 +176,18 @@ def main():
 
         animation = int(input("Do you want to see the animation? (1 - Yes, 2 - No): "))
 
-        if run_game == 1:
-            selection_type = 1
-            game.play_game(
-                board,
-                board_size,
-                individual_count,
-                mutation_probability,
-                max_generations,
-                treasure_count,
-                random_values_for_individuals,
-                elite_individual_count,
-                selection_type,
-                animation,
-            )
-
-            selection_type = 2
-            game.play_game(
-                board,
-                board_size,
-                individual_count,
-                mutation_probability,
-                max_generations,
-                treasure_count,
-                random_values_for_individuals,
-                elite_individual_count,
-                selection_type,
-                animation,
-            )
-        else:
-            game.play_game(
-                board,
-                board_size,
-                individual_count,
-                mutation_probability,
-                max_generations,
-                treasure_count,
-                random_values_for_individuals,
-                elite_individual_count,
-                selection_type,
-                animation,
-            )
+        game.play_game(
+            board,
+            board_size,
+            individual_count,
+            mutation_probability,
+            max_generations,
+            treasure_count,
+            random_values_for_individuals,
+            elite_individual_count,
+            selection_type,
+            animation,
+        )
 
 
 if __name__ == "__main__":

@@ -323,7 +323,3 @@ def play_game(
         printing.graph(best_fintness_generations)
         print("Best solution board: ")
         printing.print_letter_board(generation_list_object[0].board)
-        if animation == 1:
-            move_animation.animation(
-                board_copy, board_size, generation_list_object[0].moves_list
-            )
