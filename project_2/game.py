@@ -372,6 +372,7 @@ def play_game(
     elite_individual_count,
     selection_type,
     animation,
+    graph,
 ):
     # we initialize the solution so we can use it in other functions and stop the game if it is found, and the generation number
     global solution_individual, generation_num
@@ -443,10 +444,12 @@ def play_game(
     if solution_individual is not None:
         print(green + "\nSolution found." + reset)
         print(f"Generation number: {generation_num}")
+        print(f"Treasures found: {solution_individual.treasure_found_num}")
         print(magenta + "Solution path: " + reset)
         print(solution_individual.moves_list)
         best_fintness_individuals.append(solution_individual.fitness)
-        printing.graph(best_fintness_individuals)
+        if graph:
+            printing.graph(best_fintness_individuals)
         print("Solution board after moves: ")
         printing.print_letter_board(solution_individual.board)
         if animation == 1:
@@ -455,13 +458,17 @@ def play_game(
     else:
         print(blue + "\nSolution not found." + reset)
         print(f"Generation number: {generation_num}")
+        print(f"Treasures found: {generation_list_object[0].treasure_found_num}")
         print(magenta + "Best solution path: " + reset)
         print(generation_list_object[0].moves_list)
         best_fintness_individuals.append(generation_list_object[0].fitness)
-        printing.graph(best_fintness_individuals)
+        if graph:
+            printing.graph(best_fintness_individuals)
         print("Best solution board after moves: ")
         printing.print_letter_board(generation_list_object[0].board)
         if animation == 1:
             printing.animation(
                 board_copy, board_size, generation_list_object[0].moves_list
             )
+
+    return generation_num

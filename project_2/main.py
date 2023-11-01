@@ -199,6 +199,7 @@ def main():
             elite_individual_count,
             selection_type,
             animation,
+            graph=True,
         )
 
 
