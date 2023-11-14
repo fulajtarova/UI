@@ -1,167 +1,133 @@
-import numpy as np
+import random
 import matplotlib.pyplot as plt
+import copy
+import time
 
 
-def k_nearest_neighbors(x, y, k, red, green, blue, purple):
-    all_points = np.array(red + green + blue + purple)
-    distances = np.sqrt((all_points[:, 0] - x) ** 2 + (all_points[:, 1] - y) ** 2)
+def visualize_dots(dots, accuracy):
+    fig, ax = plt.subplots()
 
-    # Combine distances with corresponding points
-    nearest_neighbors = np.column_stack((distances, all_points))
+    for color in dots:
+        dot_array = [list(dot) for dot in dots[color]]
+        dot_array = list(zip(*dot_array))  # Transpose the dot array for plotting
+        ax.scatter(dot_array[0], dot_array[1], c=color, label=color)
 
-    # Sort based on distances
-    nearest_neighbors = nearest_neighbors[np.argsort(nearest_neighbors[:, 0])]
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    ax.set_title(f"Dots Visualization\nAccuracy: {accuracy:.2f}%")
 
-    # Get the k nearest neighbors
-    nearest_neighbors = nearest_neighbors[:k, 1:]
-
-    return nearest_neighbors
-
-
-def classify(x, y, color, k, red, green, blue, purple):
-    neighbors = k_nearest_neighbors(x, y, k, red, green, blue, purple)
-
-    colors = []
-
-    for i in range(len(neighbors)):
-        neighbor_list = neighbors[i].tolist()  # Convert array to list
-        if neighbor_list in red:
-            colors.append("red")
-        elif neighbor_list in green:
-            colors.append("green")
-        elif neighbor_list in blue:
-            colors.append("blue")
-        elif neighbor_list in purple:
-            colors.append("purple")
-
-    # Find the majority color
-    majority_color = max(set(colors), key=colors.count)
-
-    # Visualization
-    # Manually plot points with the majority color
-    plt.plot(x, y, color=majority_color, marker=".", markersize=5)
-
-    return 1 if majority_color == color else 0
+    plt.show()
 
 
-def make_color_order(n):
+def classify_point(point, dots, k):
+    distances = []
+    for color in dots:
+        for dot in dots[color]:
+            distance = ((point[0] - dot[0]) ** 2 + (point[1] - dot[1]) ** 2) ** 0.5
+            distances.append((distance, color))
+
+    distances.sort(key=lambda x: x[0])
+    distances = distances[:k]
+
+    colors = [x[1] for x in distances]
+    return max(colors, key=colors.count)
+
+
+def random_dot(color):
+    borders = {
+        "red": (-5000, 500, -5000, 500),
+        "green": (-500, 5000, -5000, 500),
+        "blue": (-5000, 500, -500, 5000),
+        "purple": (-500, 5000, -500, 5000),
+    }
+
+    if random.uniform(0, 1) < 0.9:
+        x = random.randint(borders[color][0], borders[color][1])
+        y = random.randint(borders[color][2], borders[color][3])
+    else:
+        x = random.randint(-5000, 5000)
+        y = random.randint(-5000, 5000)
+
+    return (x, y)
+
+
+def make_dots(num_points, dots):
+    points = []
     colors = ["red", "green", "blue", "purple"]
 
-    color_order = []
+    for _ in range(num_points):
+        for color in colors:
+            point = random_dot(color)
+            while point in points or point in dots[color]:
+                point = random_dot(color)
+            points.append(point)
 
-    print(4 * n)
-
-    while len(color_order) < 4 * n:
-        np.random.shuffle(colors)
-        color_order.extend(colors)
-
-    return color_order
+    return points
 
 
 def main():
-    red = [
-        [-4500, -4400],
-        [-4100, -3000],
-        [-1800, -2400],
-        [-2500, -3400],
-        [-2000, -1400],
-    ]
-    green = [
-        [+4500, -4400],
-        [+4100, -3000],
-        [+1800, -2400],
-        [+2500, -3400],
-        [+2000, -1400],
-    ]
-    blue = [
-        [-4500, +4400],
-        [-4100, +3000],
-        [-1800, +2400],
-        [-2500, +3400],
-        [-2000, +1400],
-    ]
-    purple = [
-        [+4500, +4400],
-        [+4100, +3000],
-        [+1800, +2400],
-        [+2500, +3400],
-        [+2000, +1400],
-    ]
-
     k_values = [1, 3, 7, 15]
     num_points = 1000
+    colors = ["red", "green", "blue", "purple"]
 
-    color_order = make_color_order(num_points)
+    dots = {
+        "red": [
+            (-4500, -4400),
+            (-4100, -3000),
+            (-1800, -2400),
+            (-2500, -3400),
+            (-2000, -1400),
+        ],
+        "green": [
+            (4500, -4400),
+            (4100, -3000),
+            (1800, -2400),
+            (2500, -3400),
+            (2000, -1400),
+        ],
+        "blue": [
+            (-4500, 4400),
+            (-4100, 3000),
+            (-1800, +2400),
+            (-2500, +3400),
+            (-2000, +1400),
+        ],
+        "purple": [
+            (4500, 4400),
+            (4100, 3000),
+            (1800, 2400),
+            (2500, 3400),
+            (2000, 1400),
+        ],
+    }
+
+    print("Welcome to the KNN Classifier!")
 
     for k in k_values:
         correct = 0
-        for color in color_order:
-            if color == "red":
-                x, y = np.random.uniform(-5000, 500, 1), np.random.uniform(
-                    -5000, 500, 1
-                )
-                while any(
-                    np.all(np.array([x[0], y[0]]) == np.array(point)) for point in red
-                ):
-                    x, y = np.random.uniform(-5000, 500, 1), np.random.uniform(
-                        -5000, 500, 1
-                    )
+        print(f"\nClassifying with k = {k}...")
 
-                correct += classify(x, y, color, k, red, green, blue, purple)
-                red.append([x[0], y[0]])
+        dots_copy = copy.deepcopy(dots)
 
-            elif color == "green":
-                x, y = np.random.uniform(-500, 5000, 1), np.random.uniform(
-                    -5000, 500, 1
-                )
-                while any(
-                    np.all(np.array([x[0], y[0]]) == np.array(point)) for point in green
-                ):
-                    x, y = np.random.uniform(-5000, 500, 1), np.random.uniform(
-                        -5000, 500, 1
-                    )
+        start = time.time()
 
-                correct += classify(x, y, color, k, red, green, blue, purple)
-                green.append([x[0], y[0]])
+        for i, point in enumerate(make_dots(num_points, dots_copy)):
+            color = classify_point(point, dots_copy, k)
+            expected_color = colors[i % 4]
+            dots_copy[color].append(point)
 
-            elif color == "blue":
-                x, y = np.random.uniform(-5000, 500, 1), np.random.uniform(
-                    -500, 5000, 1
-                )
-                while any(
-                    np.all(np.array([x[0], y[0]]) == np.array(point)) for point in blue
-                ):
-                    x, y = np.random.uniform(-5000, 500, 1), np.random.uniform(
-                        -5000, 500, 1
-                    )
+            if color == expected_color:
+                correct += 1
 
-                correct += classify(x, y, color, k, red, green, blue, purple)
-                blue.append([x[0], y[0]])
-            elif color == "purple":
-                x, y = np.random.uniform(-500, 5000, 1), np.random.uniform(
-                    -500, 5000, 1
-                )
-                while any(
-                    np.all(np.array([x[0], y[0]]) == np.array(point))
-                    for point in purple
-                ):
-                    x, y = np.random.uniform(-5000, 500, 1), np.random.uniform(
-                        -5000, 500, 1
-                    )
-                correct += classify(x, y, color, k, red, green, blue, purple)
-                purple.append([x[0], y[0]])
+        end = time.time()
+        time_elapsed = end - start
 
-        print("Correct: ", correct)
+        accuracy = (correct / (4 * num_points)) * 100
 
-        print(f"Accuracy for k = {k}: {correct / num_points}")
+        print(f"Accuracy: {accuracy:.2f}%")
+        print(f"Time elapsed: {time_elapsed:.2f}s")
 
-        # Display the plot
-        plt.xlim(-5000, 5000)
-        plt.ylim(-5000, 5000)
-        plt.gca().set_aspect("equal", adjustable="box")
-        plt.xlabel("X")
-        plt.ylabel("Y")
-        plt.show()
+        visualize_dots(dots_copy, accuracy)
 
 
 if __name__ == "__main__":
