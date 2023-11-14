@@ -44,6 +44,20 @@ def classify(x, y, color, k, red, green, blue, purple):
     return 1 if majority_color == color else 0
 
 
+def make_color_order(n):
+    colors = ["red", "green", "blue", "purple"]
+
+    color_order = []
+
+    print(4 * n)
+
+    while len(color_order) < 4 * n:
+        np.random.shuffle(colors)
+        color_order.extend(colors)
+
+    return color_order
+
+
 def main():
     red = [
         [-4500, -4400],
@@ -75,62 +89,71 @@ def main():
     ]
 
     k_values = [1, 3, 7, 15]
-    num_points = 100
+    num_points = 1000
+
+    color_order = make_color_order(num_points)
 
     for k in k_values:
-        stats = 0
-        red = 0
-        green = 0
-        blue = 0
-        purple = 0
-
-        for _ in range(4 * num_points):
-            xr, yr = np.random.uniform(-5000, 500, 1), np.random.uniform(-5000, 500, 1)
-            while any(
-                np.all(np.array([xr[0], yr[0]]) == np.array(point)) for point in red
-            ):
-                xr, yr = np.random.uniform(-5000, 500, 1), np.random.uniform(
+        correct = 0
+        for color in color_order:
+            if color == "red":
+                x, y = np.random.uniform(-5000, 500, 1), np.random.uniform(
                     -5000, 500, 1
                 )
+                while any(
+                    np.all(np.array([x[0], y[0]]) == np.array(point)) for point in red
+                ):
+                    x, y = np.random.uniform(-5000, 500, 1), np.random.uniform(
+                        -5000, 500, 1
+                    )
 
-            xg, yg = np.random.uniform(-500, 5000, 1), np.random.uniform(-5000, 500, 1)
-            while any(
-                np.all(np.array([xg[0], yg[0]]) == np.array(point)) for point in green
-            ):
-                xg, yg = np.random.uniform(-5000, 500, 1), np.random.uniform(
+                correct += classify(x, y, color, k, red, green, blue, purple)
+                red.append([x[0], y[0]])
+
+            elif color == "green":
+                x, y = np.random.uniform(-500, 5000, 1), np.random.uniform(
                     -5000, 500, 1
                 )
+                while any(
+                    np.all(np.array([x[0], y[0]]) == np.array(point)) for point in green
+                ):
+                    x, y = np.random.uniform(-5000, 500, 1), np.random.uniform(
+                        -5000, 500, 1
+                    )
 
-            xb, yb = np.random.uniform(-5000, 500, 1), np.random.uniform(-500, 5000, 1)
-            while any(
-                np.all(np.array([xb[0], yb[0]]) == np.array(point)) for point in blue
-            ):
-                xb, yb = np.random.uniform(-5000, 500, 1), np.random.uniform(
-                    -5000, 500, 1
+                correct += classify(x, y, color, k, red, green, blue, purple)
+                green.append([x[0], y[0]])
+
+            elif color == "blue":
+                x, y = np.random.uniform(-5000, 500, 1), np.random.uniform(
+                    -500, 5000, 1
                 )
+                while any(
+                    np.all(np.array([x[0], y[0]]) == np.array(point)) for point in blue
+                ):
+                    x, y = np.random.uniform(-5000, 500, 1), np.random.uniform(
+                        -5000, 500, 1
+                    )
 
-            xp, yp = np.random.uniform(-500, 5000, 1), np.random.uniform(-500, 5000, 1)
-            while any(
-                np.all(np.array([xp[0], yp[0]]) == np.array(point)) for point in purple
-            ):
-                xp, yp = np.random.uniform(-5000, 500, 1), np.random.uniform(
-                    -5000, 500, 1
+                correct += classify(x, y, color, k, red, green, blue, purple)
+                blue.append([x[0], y[0]])
+            elif color == "purple":
+                x, y = np.random.uniform(-500, 5000, 1), np.random.uniform(
+                    -500, 5000, 1
                 )
+                while any(
+                    np.all(np.array([x[0], y[0]]) == np.array(point))
+                    for point in purple
+                ):
+                    x, y = np.random.uniform(-5000, 500, 1), np.random.uniform(
+                        -5000, 500, 1
+                    )
+                correct += classify(x, y, color, k, red, green, blue, purple)
+                purple.append([x[0], y[0]])
 
-            correctr = classify(xr[0], yr[0], "red", k, red, green, blue, purple)
-            correctg = classify(xg[0], yg[0], "green", k, red, green, blue, purple)
-            correctb = classify(xb[0], yb[0], "blue", k, red, green, blue, purple)
-            correctp = classify(xp[0], yp[0], "purple", k, red, green, blue, purple)
+        print("Correct: ", correct)
 
-            red.append([xr[0], yr[0]])
-            green.append([xg[0], yg[0]])
-            blue.append([xb[0], yb[0]])
-            purple.append([xp[0], yp[0]])
-
-            stats += correctr + correctg + correctb + correctp
-
-        accuracy = stats / (len(k_values) * num_points)
-        print(f"Accuracy for k = {k}: {accuracy:.2%}")
+        print(f"Accuracy for k = {k}: {correct / num_points}")
 
         # Display the plot
         plt.xlim(-5000, 5000)
