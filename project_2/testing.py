@@ -101,7 +101,7 @@ def testing():
     roulette_evolutions = []
 
     t11 = time.time()
-    for x in range(50):
+    for x in range(100):
         print(x)
         gen_num = game.play_game(
             board,
@@ -128,7 +128,7 @@ def testing():
     tournament_evolutions = []
 
     t21 = time.time()
-    for x in range(50):
+    for x in range(100):
         print(x)
         gen_num = game.play_game(
             board,
