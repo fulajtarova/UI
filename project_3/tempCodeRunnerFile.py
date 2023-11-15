@@ -7,38 +7,31 @@ import itertools
 import numpy as np
 
 
+from scipy.spatial import ConvexHull
+
+
 def visualize_dots(dots, accuracy, filler_dots):
     fig, ax = plt.subplots()
 
     for color in filler_dots:
         if filler_dots[color]:
             dot_array = np.array(filler_dots[color])
-            ax.scatter(dot_array[:, 0], dot_array[:, 1], c=color, alpha=0.4, s=100)
+            ax.scatter(dot_array[:, 0], dot_array[:, 1], c=color, alpha=0.3, s=100)
 
     for color in dots:
         dot_array = np.array(dots[color])
-        ax.scatter(
-            dot_array[:, 0],
-            dot_array[:, 1],
-            c=color,
-            label=color,
-            marker="o",
-            edgecolors="black",
-        )
+        ax.scatter(dot_array[:, 0], dot_array[:, 1], c=color, label=color, marker="o")
 
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
     ax.set_title(f"Dots Visualization\nAccuracy: {accuracy:.2f}%")
-
-    # Set aspect ratio to be equal
-    ax.set_aspect("equal", adjustable="box")
 
     plt.show()
 
 
 def make_filler_dots(dots, k):
     total_range = 5000
-    interval = int(total_range / 20)
+    interval = int(total_range / 25)
     filler_dots = {
         "red": [],
         "green": [],
@@ -46,10 +39,8 @@ def make_filler_dots(dots, k):
         "purple": [],
     }
 
-    for x in range(-total_range + interval // 2, total_range + interval // 2, interval):
-        for y in range(
-            -total_range + interval // 2, total_range + interval // 2, interval
-        ):
+    for x in range(-5000, 5000, interval):
+        for y in range(-5000, 5000, interval):
             point = (x, y)
             color = classify(point, dots, k)
             filler_dots[color].append(point)
@@ -77,7 +68,7 @@ def random_dot(color):
         "purple": (-500, 5000, -500, 5000),
     }
 
-    if random.random() < 0.99:
+    if random.uniform(0, 1) < 0.99:
         x = random.randint(borders[color][0], borders[color][1])
         y = random.randint(borders[color][2], borders[color][3])
     else:
@@ -103,10 +94,11 @@ def make_dots(individual_color_num, dots, colors):
     return new_points
 
 
-def main(color_count, k_values):
-    k_values = [1, 3, 7, 15]
+def main():
+    # k_values = [1, 3, 7, 15]
+    k_values = [3]
 
-    individual_color_num = color_count // 4
+    individual_color_num = 1000
     colors = ["red", "green", "blue", "purple"]
 
     dots = {
@@ -162,13 +154,9 @@ def main(color_count, k_values):
         time_elapsed = end - start
 
         accuracy = (correct / (4 * individual_color_num)) * 100
-        wrong = 4 * individual_color_num - correct
 
         print(f"Accuracy: {accuracy:.2f}%")
-        print(f"Wrong classifications: {wrong}")
         print(f"Time elapsed: {time_elapsed:.2f}s")
-
-        print("Making filler dots...")
 
         filler_dots = make_filler_dots(dots_copy, k)
 
@@ -178,12 +166,5 @@ def main(color_count, k_values):
 
 
 if __name__ == "__main__":
-    color_count = int(input("Enter how many new dots you want to classify: "))
-    run_count = int(input("Enter how many times you want to run the program: "))
-    k_values = []
-
-    k_values_input = input("Enter the k values you want to use (space-separated): ")
-    k_values = [int(k) for k in k_values_input.split()]
-
-    for _ in range(run_count):
-        main(color_count, k_values)
+    for _ in range(1):
+        main()
