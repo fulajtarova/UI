@@ -103,10 +103,8 @@ def make_dots(individual_color_num, dots, colors):
     return new_points
 
 
-def main(color_count, k_values):
-    k_values = [1, 3, 7, 15]
-
-    individual_color_num = color_count // 4
+def main(individual_color_count, k_values):
+    total_color_count = individual_color_count * 4
     colors = ["red", "green", "blue", "purple"]
 
     dots = {
@@ -140,8 +138,6 @@ def main(color_count, k_values):
         ],
     }
 
-    print("Welcome to the KNN Classifier!")
-
     for k in k_values:
         correct = 0
         print(f"\nClassifying with k = {k}...")
@@ -150,7 +146,7 @@ def main(color_count, k_values):
 
         start = time.time()
 
-        for i, point in enumerate(make_dots(individual_color_num, dots_copy, colors)):
+        for i, point in enumerate(make_dots(individual_color_count, dots_copy, colors)):
             color = classify(point, dots_copy, k)
             expected_color = colors[i % 4]
             dots_copy[color].append(point)
@@ -161,11 +157,11 @@ def main(color_count, k_values):
         end = time.time()
         time_elapsed = end - start
 
-        accuracy = (correct / (4 * individual_color_num)) * 100
-        wrong = 4 * individual_color_num - correct
+        accuracy = (correct / (total_color_count)) * 100
 
         print(f"Accuracy: {accuracy:.2f}%")
-        print(f"Wrong classifications: {wrong}")
+        print(f"Correct classifications: {correct}")
+        print(f"Wrong classifications: {total_color_count - correct}")
         print(f"Time elapsed: {time_elapsed:.2f}s")
 
         print("Making filler dots...")
@@ -178,12 +174,28 @@ def main(color_count, k_values):
 
 
 if __name__ == "__main__":
-    color_count = int(input("Enter how many new dots you want to classify: "))
-    run_count = int(input("Enter how many times you want to run the program: "))
-    k_values = []
+    while True:
+        try:
+            print("Welcome to the KNN Classifier!\n")
 
-    k_values_input = input("Enter the k values you want to use (space-separated): ")
-    k_values = [int(k) for k in k_values_input.split()]
+            color_count = int(
+                input(
+                    "Enter how many new dots you want to classify inidvidualy per color: "
+                )
+            )
+            run_count = int(input("Enter how many times you want to run the program: "))
+            k_values = []
 
-    for _ in range(run_count):
-        main(color_count, k_values)
+            k_values_input = input(
+                "Enter the k values you want to use (space-separated): "
+            )
+            k_values = [int(k) for k in k_values_input.split()]
+
+            for _ in range(run_count):
+                main(color_count, k_values)
+
+            if input("Do you want to continue? (y/n): ") != "y":
+                break
+
+        except ValueError:
+            print("\nInvalid input!\n")
