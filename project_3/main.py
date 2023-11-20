@@ -150,6 +150,7 @@ def main(individual_color_count, k_values):
             color = classify(point, dots_copy, k)
             expected_color = colors[i % 4]
             dots_copy[color].append(point)
+            print(f"Point {i + 1} classified")
 
             if color == expected_color:
                 correct += 1
@@ -176,7 +177,7 @@ def main(individual_color_count, k_values):
 if __name__ == "__main__":
     while True:
         try:
-            print("Welcome to the KNN Classifier!\n")
+            print("\nWelcome to the KNN Classifier!\n")
 
             color_count = int(
                 input(
