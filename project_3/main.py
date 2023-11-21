@@ -6,15 +6,24 @@ from collections import Counter
 import itertools
 import numpy as np
 
+"""
+-------------------------------------------------------------------------------------------
+ function to visualize the dots and the accuracy
+-------------------------------------------------------------------------------------------
+"""
+
 
 def visualize_dots(dots, accuracy, filler_dots):
+    # create a plot
     fig, ax = plt.subplots()
 
+    # plot the filler dots
     for color in filler_dots:
         if filler_dots[color]:
             dot_array = np.array(filler_dots[color])
             ax.scatter(dot_array[:, 0], dot_array[:, 1], c=color, alpha=0.4, s=100)
 
+    # plot the dots
     for color in dots:
         dot_array = np.array(dots[color])
         ax.scatter(
@@ -26,14 +35,23 @@ def visualize_dots(dots, accuracy, filler_dots):
             edgecolors="black",
         )
 
+    # add a legend
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
     ax.set_title(f"Dots Visualization\nAccuracy: {accuracy:.2f}%")
 
-    # Set aspect ratio to be equal
+    # set aspect ratio to be equal
     ax.set_aspect("equal", adjustable="box")
 
+    # show the plot
     plt.show()
+
+
+"""
+-------------------------------------------------------------------------------------------
+function to generate and classify the dots using the KNN algorithm and euclidean distance formula
+-------------------------------------------------------------------------------------------
+"""
 
 
 def make_filler_dots(dots, k):
@@ -46,6 +64,7 @@ def make_filler_dots(dots, k):
         "purple": [],
     }
 
+    # generate filler dots and classify them
     for x in range(-total_range + interval // 2, total_range + interval // 2, interval):
         for y in range(
             -total_range + interval // 2, total_range + interval // 2, interval
@@ -55,6 +74,13 @@ def make_filler_dots(dots, k):
             filler_dots[color].append(point)
 
     return filler_dots
+
+
+"""
+-------------------------------------------------------------------------------------------
+function to classify a point using the KNN algorithm and euclidean distance formula
+-------------------------------------------------------------------------------------------
+"""
 
 
 def classify(point, dots, k):
@@ -69,7 +95,15 @@ def classify(point, dots, k):
     return Counter(top_k_colors).most_common(1)[0][0]
 
 
+"""
+-------------------------------------------------------------------------------------------
+function to generate a random dot based on the color and the borders
+-------------------------------------------------------------------------------------------
+"""
+
+
 def random_dot(color):
+    # borders for each color
     borders = {
         "red": (-5000, 500, -5000, 500),
         "green": (-500, 5000, -5000, 500),
@@ -77,6 +111,7 @@ def random_dot(color):
         "purple": (-500, 5000, -500, 5000),
     }
 
+    # 99% chance to generate a dot in the borders, 1% chance to generate a dot outside the borders
     if random.random() < 0.99:
         x = random.randint(borders[color][0], borders[color][1])
         y = random.randint(borders[color][2], borders[color][3])
@@ -87,25 +122,48 @@ def random_dot(color):
     return (x, y)
 
 
+"""
+-------------------------------------------------------------------------------------------
+function to generate dots for each color into a list and return the list
+-------------------------------------------------------------------------------------------
+"""
+
+
 def make_dots(individual_color_num, dots, colors):
+    # loop through each color
     colors = itertools.cycle(colors)
     new_points = []
 
+    # generate dots for each color
     for _ in range(4 * individual_color_num):
+        # get the next color
         color = next(colors)
+        # generate a random dot
         point = random_dot(color)
 
+        # if the dot is already in the list or in the dots list, generate a new dot
         while point in new_points or point in dots[color]:
             point = random_dot(color)
 
+        # add the dot to the list
         new_points.append(point)
 
     return new_points
 
 
-def main(individual_color_count, k_values):
+"""
+-------------------------------------------------------------------------------------------
+main function is the entry point of the program, it generates the dots, classifies and visualizes them
+also it calculates the accuracy and the time elapsed
+-------------------------------------------------------------------------------------------
+"""
+
+
+def main(individual_color_count, k_values, visualize):
     total_color_count = individual_color_count * 4
     colors = ["red", "green", "blue", "purple"]
+
+    result = []
 
     dots = {
         "red": [
@@ -165,15 +223,22 @@ def main(individual_color_count, k_values):
         print(f"Wrong classifications: {total_color_count - correct}")
         print(f"Time elapsed: {time_elapsed:.2f}s")
 
-        print("Making filler dots...")
+        if visualize:
+            print("Making filler dots...")
+            filler_dots = make_filler_dots(dots_copy, k)
+            print("Visualizing...")
+            visualize_dots(dots_copy, accuracy, filler_dots)
 
-        filler_dots = make_filler_dots(dots_copy, k)
+        result.append((k, accuracy, time_elapsed))
 
-        print("Visualizing...")
-
-        visualize_dots(dots_copy, accuracy, filler_dots)
+    return result
 
 
+"""
+-------------------------------------------------------------------------------------------
+start the program with the user input
+-------------------------------------------------------------------------------------------
+"""
 if __name__ == "__main__":
     while True:
         try:
@@ -193,9 +258,10 @@ if __name__ == "__main__":
             k_values = [int(k) for k in k_values_input.split()]
 
             for _ in range(run_count):
-                main(color_count, k_values)
+                main(color_count, k_values, visualize=True)
 
             if input("Do you want to continue? (y/n): ") != "y":
+                print("\nGoodbye!")
                 break
 
         except ValueError:
