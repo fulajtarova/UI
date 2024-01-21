@@ -84,14 +84,19 @@ function to classify a point using the KNN algorithm and euclidean distance form
 
 
 def classify(point, dots, k):
+    # calculate the distance between the point and each dot using the euclidean distance formula
     distances = [
         (color, ((point[0] - dot[0]) ** 2 + (point[1] - dot[1]) ** 2) ** 0.5)
         for color in dots
         for dot in dots[color]
     ]
+
+    # sort the distances by the distance
     distances.sort(key=lambda x: x[1])
 
+    # get the top k colors
     top_k_colors = [color for color, _ in distances[:k]]
+    # return the most common color
     return Counter(top_k_colors).most_common(1)[0][0]
 
 
@@ -159,70 +164,46 @@ also it calculates the accuracy and the time elapsed
 """
 
 
-def main(individual_color_count, k_values, visualize):
+def main(individual_color_count, k_values, visualize, new_dots, old_dots):
     total_color_count = individual_color_count * 4
     colors = ["red", "green", "blue", "purple"]
 
     result = []
 
-    dots = {
-        "red": [
-            (-4500, -4400),
-            (-4100, -3000),
-            (-1800, -2400),
-            (-2500, -3400),
-            (-2000, -1400),
-        ],
-        "green": [
-            (4500, -4400),
-            (4100, -3000),
-            (1800, -2400),
-            (2500, -3400),
-            (2000, -1400),
-        ],
-        "blue": [
-            (-4500, 4400),
-            (-4100, 3000),
-            (-1800, +2400),
-            (-2500, +3400),
-            (-2000, +1400),
-        ],
-        "purple": [
-            (4500, 4400),
-            (4100, 3000),
-            (1800, 2400),
-            (2500, 3400),
-            (2000, 1400),
-        ],
-    }
-
+    # run the program for each k value
     for k in k_values:
         correct = 0
         print(f"\nClassifying with k = {k}...")
 
-        dots_copy = copy.deepcopy(dots)
+        dots_copy = copy.deepcopy(old_dots)
 
         start = time.time()
 
-        for i, point in enumerate(make_dots(individual_color_count, dots_copy, colors)):
+        # goind through each point and classifying it, then adding it to the dots list
+        for i, point in enumerate(new_dots):
             color = classify(point, dots_copy, k)
             expected_color = colors[i % 4]
             dots_copy[color].append(point)
             print(f"Point {i + 1} classified")
 
+            # if the color is the same as the expected color, increment the correct counter
             if color == expected_color:
                 correct += 1
 
+        # calculate the accuracy and the time elapsed
         end = time.time()
         time_elapsed = end - start
 
         accuracy = (correct / (total_color_count)) * 100
 
+        # print the results
+        print("\nResults for k =", k)
         print(f"Accuracy: {accuracy:.2f}%")
         print(f"Correct classifications: {correct}")
         print(f"Wrong classifications: {total_color_count - correct}")
         print(f"Time elapsed: {time_elapsed:.2f}s")
 
+        # if the user wants to visualize the dots, generate filler dots and visualize them
         if visualize:
             print("Making filler dots...")
             filler_dots = make_filler_dots(dots_copy, k)
@@ -257,8 +238,44 @@ if __name__ == "__main__":
             )
             k_values = [int(k) for k in k_values_input.split()]
 
+            dots = {
+                "red": [
+                    (-4500, -4400),
+                    (-4100, -3000),
+                    (-1800, -2400),
+                    (-2500, -3400),
+                    (-2000, -1400),
+                ],
+                "green": [
+                    (4500, -4400),
+                    (4100, -3000),
+                    (1800, -2400),
+                    (2500, -3400),
+                    (2000, -1400),
+                ],
+                "blue": [
+                    (-4500, 4400),
+                    (-4100, 3000),
+                    (-1800, +2400),
+                    (-2500, +3400),
+                    (-2000, +1400),
+                ],
+                "purple": [
+                    (4500, 4400),
+                    (4100, 3000),
+                    (1800, 2400),
+                    (2500, 3400),
+                    (2000, 1400),
+                ],
+            }
+
+            input("Press enter to start the program...")
+
             for _ in range(run_count):
-                main(color_count, k_values, visualize=True)
+                generated_dots = make_dots(
+                    color_count, dots, ["red", "green", "blue", "purple"]
+                )
+                main(color_count, k_values, True, generated_dots, dots)
 
             if input("Do you want to continue? (y/n): ") != "y":
                 print("\nGoodbye!")
